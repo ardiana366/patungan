@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#2563eb" />
+  <title>Aplikasi Patungan</title>
+  
+  <!-- Tailwind CSS & Lucide Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <style>
+    body { -webkit-tap-highlight-color: transparent; }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans pb-24">
+
+  <!-- ================= AUTH / LOGIN VIEW ================= -->
+  <div id="view-login" class="min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md border border-slate-100">
+      <div class="text-center mb-6">
+        <div class="inline-flex p-3 bg-blue-100 text-blue-600 rounded-2xl mb-2">
+          <i data-lucide="wallet" class="w-8 h-8"></i>
+        </div>
+        <h1 class="text-2xl font-bold text-slate-900">Aplikasi Patungan</h1>
+        <p class="text-sm text-slate-500 mt-1">Kelola target & buku kas bersama</p>
+      </div>
+
+      <form id="form-login" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Nama Pengguna</label>
+          <input type="text" id="login-name" required placeholder="Contoh: Budi" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Book Code (Room)</label>
+          <input type="text" id="login-room" required placeholder="Contoh: LIBURAN-BALI" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:outline-none uppercase" />
+          <p class="text-xs text-slate-400 mt-1">Gunakan kode yang sama untuk patungan bersama.</p>
+        </div>
+        <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-md transition">
+          Masuk ke Buku Kas
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MAIN APP VIEW ================= -->
+  <div id="view-main" class="hidden">
+    <!-- Header -->
+    <header class="bg-blue-600 text-white px-4 py-3 sticky top-0 z-30 shadow flex justify-between items-center">
+      <div>
+        <span class="text-xs uppercase tracking-wider text-blue-200">Room Code</span>
+        <h2 id="header-room" class="font-bold text-lg leading-tight flex items-center gap-1.5 cursor-pointer">
+          <span>ROOM</span> <i data-lucide="chevron-down" class="w-4 h-4"></i>
+        </h2>
+      </div>
+      <div class="text-right">
+        <span id="header-user" class="text-xs bg-blue-700 px-2.5 py-1 rounded-full border border-blue-400 font-medium">User</span>
+      </div>
+    </header>
+
+    <!-- Tab 1: Dashboard -->
+    <section id="tab-dashboard" class="p-4 space-y-4 max-w-2xl mx-auto">
+      <!-- Total Saldo Ringkasan -->
+      <div class="bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-2xl p-5 shadow-lg">
+        <p class="text-sm text-blue-100">Total Akhir Saldo Kas</p>
+        <h2 id="dash-total-balance" class="text-3xl font-extrabold mt-1">Rp 0</h2>
+        <div class="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-blue-400/40 text-xs">
+          <div>
+            <span class="text-blue-200">Total Income:</span>
+            <p id="dash-total-income" class="font-bold text-emerald-300 mt-0.5">Rp 0</p>
+          </div>
+          <div>
+            <span class="text-blue-200">Total Expense:</span>
+            <p id="dash-total-expense" class="font-bold text-rose-300 mt-0.5">Rp 0</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sisa Patungan Goals -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-3">
+        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+          <i data-lucide="target" class="w-4 h-4 text-blue-600"></i> Target & Sisa Pembagian
+        </h3>
+        <div class="grid grid-cols-2 gap-3 text-sm">
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+            <span class="text-xs text-slate-500">Total Nilai Target (Goals)</span>
+            <p id="dash-total-goals" class="font-bold text-slate-800 mt-1">Rp 0</p>
+          </div>
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+            <span class="text-xs text-slate-500">Sisa Kurang ke Target</span>
+            <p id="dash-remaining-goals" class="font-bold text-amber-600 mt-1">Rp 0</p>
+          </div>
+        </div>
+        <div class="p-3 bg-amber-50 rounded-xl border border-amber-200/60 text-xs text-amber-800">
+          <span class="font-semibold">Selisih Target vs Skema Patungan:</span>
+          <span id="dash-split-diff" class="font-bold">Rp 0</span>
+        </div>
+      </div>
+
+      <!-- Per-Inputer / Member Breakdown -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+        <h3 class="font-bold text-slate-800 text-sm mb-3 flex items-center gap-2">
+          <i data-lucide="users" class="w-4 h-4 text-blue-600"></i> Sisa Saldo / Patungan per Member
+        </h3>
+        <div id="dash-members-list" class="space-y-2 text-sm"></div>
+      </div>
+
+      <!-- Breakdown Kategori -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+        <h3 class="font-bold text-slate-800 text-sm mb-3 flex items-center gap-2">
+          <i data-lucide="pie-chart" class="w-4 h-4 text-blue-600"></i> Ringkasan per Kategori
+        </h3>
+        <div id="dash-category-list" class="space-y-2 text-xs"></div>
+      </div>
+    </section>
+
+    <!-- Tab 2: Goals & Setup Pembagian -->
+    <section id="tab-goals" class="p-4 space-y-4 max-w-2xl mx-auto hidden">
+      <!-- Form Input / Edit Goal -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+        <h3 id="form-goal-title" class="font-bold text-slate-800 text-sm mb-3">Tambah Target (Goal)</h3>
+        <form id="form-goal" class="space-y-3 text-sm">
+          <input type="hidden" id="goal-id" value="" />
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <input type="text" id="goal-name" required placeholder="Nama Goal (misal: Sewa Villa)" class="px-3 py-2 border rounded-xl" />
+            <input type="number" id="goal-amount" required placeholder="Target Biaya (Rp)" class="px-3 py-2 border rounded-xl" />
+          </div>
+          <div class="flex gap-2">
+            <button type="submit" id="goal-submit-btn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-xl transition">Simpan Target</button>
+            <button type="button" id="goal-cancel-btn" onclick="resetGoalForm()" class="hidden px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-xl">Batal</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Setup / Edit Pembagian -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+        <h3 id="form-scheme-title" class="font-bold text-slate-800 text-sm mb-1">Setup Skema Pembagian Member</h3>
+        <p class="text-xs text-slate-500 mb-3">Tentukan fixed price atau skema persentase patungan antar member.</p>
+        <form id="form-member-scheme" class="space-y-3 text-sm">
+          <input type="hidden" id="scheme-id" value="" />
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+            <input type="text" id="member-name-input" required placeholder="Nama Member" class="px-3 py-2 border rounded-xl" />
+            <select id="member-split-type" class="px-3 py-2 border rounded-xl">
+              <option value="fixed">Fixed Price (Rp)</option>
+              <option value="percent">Persentase (%)</option>
+            </select>
+            <input type="number" id="member-split-val" required placeholder="Nominal / %" class="px-3 py-2 border rounded-xl" />
+          </div>
+          <div class="flex gap-2">
+            <button type="submit" id="scheme-submit-btn" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-xl transition">Simpan Skema</button>
+            <button type="button" id="scheme-cancel-btn" onclick="resetSchemeForm()" class="hidden px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-xl">Batal</button>
+          </div>
+        </form>
+
+        <div id="split-schemes-list" class="mt-4 divide-y text-xs"></div>
+      </div>
+
+      <!-- Goals List -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+        <h3 class="font-bold text-slate-800 text-sm mb-3">Daftar Target (Goals List)</h3>
+        <div id="goals-list" class="space-y-2 text-sm"></div>
+      </div>
+    </section>
+
+    <!-- Tab 3: Buku Saldo (Income / Expense) -->
+    <section id="tab-ledger" class="p-4 space-y-4 max-w-2xl mx-auto hidden">
+      <!-- Input / Edit Transaksi -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+        <h3 id="form-tx-title" class="font-bold text-slate-800 text-sm mb-3">Catat Transaksi Buku Saldo</h3>
+        <form id="form-tx" class="space-y-3 text-sm">
+          <input type="hidden" id="tx-id" value="" />
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs text-slate-500 mb-1">Tipe</label>
+              <select id="tx-type" class="w-full px-3 py-2 border rounded-xl font-medium">
+                <option value="income">Income (+ Saldo Masuk)</option>
+                <option value="expense">Expense (- Pengeluaran)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs text-slate-500 mb-1">Nominal (Rp)</label>
+              <input type="number" id="tx-amount" required placeholder="0" class="w-full px-3 py-2 border rounded-xl" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs text-slate-500 mb-1">Kategori</label>
+              <input type="text" id="tx-category" required placeholder="Konsumsi, Transport, etc" class="w-full px-3 py-2 border rounded-xl" />
+            </div>
+            <div>
+              <label class="block text-xs text-slate-500 mb-1">Inputer / Penyetor</label>
+              <input type="text" id="tx-inputer" required placeholder="Nama Orang" class="w-full px-3 py-2 border rounded-xl" />
+            </div>
+          </div>
+
+          <div class="flex gap-2">
+            <button type="submit" id="tx-submit-btn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl transition">
+              Simpan Transaksi
+            </button>
+            <button type="button" id="tx-cancel-btn" onclick="resetTxForm()" class="hidden px-4 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-xl">
+              Batal
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Riwayat Transaksi -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+        <h3 class="font-bold text-slate-800 text-sm mb-3">Riwayat Transaksi</h3>
+        <div id="tx-list" class="divide-y space-y-2 text-xs"></div>
+      </div>
+    </section>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="fixed bottom-0 inset-x-0 bg-white border-t border-slate-200 z-30 max-w-md mx-auto flex justify-around p-2">
+      <button onclick="switchTab('dashboard')" id="nav-btn-dashboard" class="flex flex-col items-center text-blue-600 text-xs py-1">
+        <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+        <span>Dashboard</span>
+      </button>
+      <button onclick="switchTab('goals')" id="nav-btn-goals" class="flex flex-col items-center text-slate-400 text-xs py-1">
+        <i data-lucide="target" class="w-5 h-5"></i>
+        <span>Goals</span>
+      </button>
+      <button onclick="switchTab('ledger')" id="nav-btn-ledger" class="flex flex-col items-center text-slate-400 text-xs py-1">
+        <i data-lucide="book-open" class="w-5 h-5"></i>
+        <span>Buku Saldo</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Change Room Modal -->
+  <dialog id="modal-room" class="rounded-2xl p-6 backdrop:bg-black/40 shadow-xl w-11/12 max-w-sm">
+    <h3 class="font-bold text-slate-800 text-base mb-2">Ganti Book Room</h3>
+    <input type="text" id="modal-room-input" class="w-full px-3 py-2 border rounded-xl uppercase text-sm mb-4" />
+    <div class="flex justify-end gap-2 text-xs font-semibold">
+      <button onclick="document.getElementById('modal-room').close()" class="px-4 py-2 border rounded-lg">Batal</button>
+      <button onclick="confirmChangeRoom()" class="px-4 py-2 bg-blue-600 text-white rounded-lg">Pindah Room</button>
+    </div>
+  </dialog>
+
+  <!-- ================= APP LOGIC ================= -->
+  <script>
+    // --- 1. FIREBASE CONFIGURATION ---
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "your-app.firebaseapp.com",
+      databaseURL: "https://your-app-default-rtdb.firebaseio.com",
+      projectId: "your-app",
+      storageBucket: "your-app.appspot.com",
+      messagingSenderId: "123456789",
+      appId: "1:123456789:web:abcdef"
+    };
+
+    let db = null;
+    try {
+      if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.database();
+      }
+    } catch (e) {
+      console.warn("Firebase not configured, running in LocalStorage fallback mode.");
+    }
+
+    // --- 2. STATE ---
+    let currentUser = localStorage.getItem("patungan_user") || "";
+    let currentRoom = localStorage.getItem("patungan_room") || "";
+    let state = {
+      goals: [],
+      schemes: [],
+      transactions: []
+    };
+
+    const formatRp = (num) => "Rp " + Number(num || 0).toLocaleString("id-ID");
+
+    // --- 3. INIT & AUTH ---
+    window.addEventListener("DOMContentLoaded", () => {
+      lucide.createIcons();
+      if (currentUser && currentRoom) {
+        startApp();
+      }
+    });
+
+    document.getElementById("form-login").addEventListener("submit", (e) => {
+      e.preventDefault();
+      currentUser = document.getElementById("login-name").value.trim();
+      currentRoom = document.getElementById("login-room").value.trim().toUpperCase();
+      localStorage.setItem("patungan_user", currentUser);
+      localStorage.setItem("patungan_room", currentRoom);
+      startApp();
+    });
+
+    function startApp() {
+      document.getElementById("view-login").classList.add("hidden");
+      document.getElementById("view-main").classList.remove("hidden");
+      document.getElementById("header-room").firstElementChild.innerText = currentRoom;
+      document.getElementById("header-user").innerText = currentUser;
+      document.getElementById("tx-inputer").value = currentUser;
+      
+      document.getElementById("header-room").onclick = () => {
+        document.getElementById("modal-room-input").value = currentRoom;
+        document.getElementById("modal-room").showModal();
+      };
+
+      loadRoomData();
+    }
+
+    function confirmChangeRoom() {
+      const nextRoom = document.getElementById("modal-room-input").value.trim().toUpperCase();
+      if (nextRoom && nextRoom !== currentRoom) {
+        currentRoom = nextRoom;
+        localStorage.setItem("patungan_room", currentRoom);
+        document.getElementById("header-room").firstElementChild.innerText = currentRoom;
+        document.getElementById("modal-room").close();
+        loadRoomData();
+      }
+    }
+
+    // --- 4. DATA SYNC (Firebase / LocalStorage) ---
+    function loadRoomData() {
+      if (db) {
+        db.ref("rooms/" + currentRoom).on("value", (snap) => {
+          const val = snap.val() || {};
+          state.goals = val.goals ? Object.values(val.goals) : [];
+          state.schemes = val.schemes ? Object.values(val.schemes) : [];
+          state.transactions = val.transactions ? Object.values(val.transactions) : [];
+          renderAll();
+        });
+      } else {
+        const local = localStorage.getItem("patungan_data_" + currentRoom);
+        state = local ? JSON.parse(local) : { goals: [], schemes: [], transactions: [] };
+        renderAll();
+      }
+    }
+
+    function saveState() {
+      if (db) {
+        db.ref("rooms/" + currentRoom).set(state);
+      } else {
+        localStorage.setItem("patungan_data_" + currentRoom, JSON.stringify(state));
+      }
+      renderAll();
+    }
+
+    // --- 5. TAB NAVIGATION ---
+    function switchTab(tabId) {
+      ["dashboard", "goals", "ledger"].forEach((t) => {
+        document.getElementById(`tab-${t}`).classList.toggle("hidden", t !== tabId);
+        const btn = document.getElementById(`nav-btn-${t}`);
+        if (t === tabId) {
+          btn.className = "flex flex-col items-center text-blue-600 text-xs py-1";
+        } else {
+          btn.className = "flex flex-col items-center text-slate-400 text-xs py-1";
+        }
+      });
+      lucide.createIcons();
+    }
+
+    // --- 6. CRUD HANDLERS: GOALS ---
+    document.getElementById("form-goal").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const id = document.getElementById("goal-id").value;
+      const name = document.getElementById("goal-name").value.trim();
+      const amount = Number(document.getElementById("goal-amount").value);
+
+      if (id) {
+        // UPDATE
+        const idx = state.goals.findIndex((g) => g.id === id);
+        if (idx !== -1) {
+          state.goals[idx] = { ...state.goals[idx], name, amount };
+        }
+      } else {
+        // CREATE
+        state.goals.push({ id: "g_" + Date.now(), name, amount });
+      }
+
+      resetGoalForm();
+      saveState();
+    });
+
+    function editGoal(id) {
+      const g = state.goals.find((item) => item.id === id);
+      if (!g) return;
+      document.getElementById("goal-id").value = g.id;
+      document.getElementById("goal-name").value = g.name;
+      document.getElementById("goal-amount").value = g.amount;
+      document.getElementById("form-goal-title").innerText = "Edit Target (Goal)";
+      document.getElementById("goal-submit-btn").innerText = "Update Target";
+      document.getElementById("goal-cancel-btn").classList.remove("hidden");
+      switchTab("goals");
+    }
+
+    function deleteGoal(id) {
+      if (confirm("Hapus target ini?")) {
+        state.goals = state.goals.filter((g) => g.id !== id);
+        saveState();
+      }
+    }
+
+    function resetGoalForm() {
+      document.getElementById("goal-id").value = "";
+      document.getElementById("goal-name").value = "";
+      document.getElementById("goal-amount").value = "";
+      document.getElementById("form-goal-title").innerText = "Tambah Target (Goal)";
+      document.getElementById("goal-submit-btn").innerText = "Simpan Target";
+      document.getElementById("goal-cancel-btn").classList.add("hidden");
+    }
+
+    // --- 7. CRUD HANDLERS: SCHEMES ---
+    document.getElementById("form-member-scheme").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const id = document.getElementById("scheme-id").value;
+      const name = document.getElementById("member-name-input").value.trim();
+      const type = document.getElementById("member-split-type").value;
+      const value = Number(document.getElementById("member-split-val").value);
+
+      if (id) {
+        // UPDATE
+        const idx = state.schemes.findIndex((s) => s.id === id);
+        if (idx !== -1) {
+          state.schemes[idx] = { id, name, type, value };
+        }
+      } else {
+        // CREATE / AUTO-MERGE EXISTING
+        const existingIdx = state.schemes.findIndex((s) => s.name.toLowerCase() === name.toLowerCase());
+        if (existingIdx >= 0) {
+          state.schemes[existingIdx] = { ...state.schemes[existingIdx], type, value };
+        } else {
+          state.schemes.push({ id: "s_" + Date.now(), name, type, value });
+        }
+      }
+
+      resetSchemeForm();
+      saveState();
+    });
+
+    function editScheme(id) {
+      const s = state.schemes.find((item) => item.id === id);
+      if (!s) return;
+      document.getElementById("scheme-id").value = s.id;
+      document.getElementById("member-name-input").value = s.name;
+      document.getElementById("member-split-type").value = s.type;
+      document.getElementById("member-split-val").value = s.value;
+      document.getElementById("form-scheme-title").innerText = "Edit Skema Pembagian Member";
+      document.getElementById("scheme-submit-btn").innerText = "Update Skema";
+      document.getElementById("scheme-cancel-btn").classList.remove("hidden");
+      switchTab("goals");
+    }
+
+    function deleteScheme(id) {
+      if (confirm("Hapus skema member ini?")) {
+        state.schemes = state.schemes.filter((s) => s.id !== id);
+        saveState();
+      }
+    }
+
+    function resetSchemeForm() {
+      document.getElementById("scheme-id").value = "";
+      document.getElementById("member-name-input").value = "";
+      document.getElementById("member-split-val").value = "";
+      document.getElementById("form-scheme-title").innerText = "Setup Skema Pembagian Member";
+      document.getElementById("scheme-submit-btn").innerText = "Simpan Skema";
+      document.getElementById("scheme-cancel-btn").classList.add("hidden");
+    }
+
+    // --- 8. CRUD HANDLERS: TRANSACTIONS ---
+    document.getElementById("form-tx").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const id = document.getElementById("tx-id").value;
+      const type = document.getElementById("tx-type").value;
+      const amount = Number(document.getElementById("tx-amount").value);
+      const category = document.getElementById("tx-category").value.trim();
+      const inputer = document.getElementById("tx-inputer").value.trim();
+
+      if (id) {
+        // UPDATE
+        const idx = state.transactions.findIndex((tx) => tx.id === id);
+        if (idx !== -1) {
+          state.transactions[idx] = {
+            ...state.transactions[idx],
+            type,
+            amount,
+            category,
+            inputer
+          };
+        }
+      } else {
+        // CREATE
+        state.transactions.unshift({
+          id: "tx_" + Date.now(),
+          type,
+          amount,
+          category,
+          inputer,
+          date: new Date().toISOString()
+        });
+      }
+
+      resetTxForm();
+      saveState();
+    });
+
+    function editTx(id) {
+      const tx = state.transactions.find((item) => item.id === id);
+      if (!tx) return;
+      document.getElementById("tx-id").value = tx.id;
+      document.getElementById("tx-type").value = tx.type;
+      document.getElementById("tx-amount").value = tx.amount;
+      document.getElementById("tx-category").value = tx.category;
+      document.getElementById("tx-inputer").value = tx.inputer;
+      document.getElementById("form-tx-title").innerText = "Edit Transaksi Buku Saldo";
+      document.getElementById("tx-submit-btn").innerText = "Update Transaksi";
+      document.getElementById("tx-cancel-btn").classList.remove("hidden");
+      switchTab("ledger");
+    }
+
+    function deleteTx(id) {
+      if (confirm("Hapus transaksi ini?")) {
+        state.transactions = state.transactions.filter((tx) => tx.id !== id);
+        saveState();
+      }
+    }
+
+    function resetTxForm() {
+      document.getElementById("tx-id").value = "";
+      document.getElementById("tx-amount").value = "";
+      document.getElementById("tx-category").value = "";
+      document.getElementById("tx-inputer").value = currentUser;
+      document.getElementById("form-tx-title").innerText = "Catat Transaksi Buku Saldo";
+      document.getElementById("tx-submit-btn").innerText = "Simpan Transaksi";
+      document.getElementById("tx-cancel-btn").classList.add("hidden");
+    }
+
+    // --- 9. CALCULATIONS & RENDERING ---
+    function renderAll() {
+      // 1. Dashboard Calculations
+      let totalIncome = 0;
+      let totalExpense = 0;
+      const catTotals = {};
+      const inputerIncome = {};
+
+      state.transactions.forEach((tx) => {
+        if (tx.type === "income") {
+          totalIncome += tx.amount;
+          inputerIncome[tx.inputer] = (inputerIncome[tx.inputer] || 0) + tx.amount;
+        } else {
+          totalExpense += tx.amount;
+        }
+        
+        if (!catTotals[tx.category]) catTotals[tx.category] = { in: 0, out: 0 };
+        catTotals[tx.category][tx.type === "income" ? "in" : "out"] += tx.amount;
+      });
+
+      const totalBalance = totalIncome - totalExpense;
+      const totalGoals = state.goals.reduce((acc, g) => acc + g.amount, 0);
+      const remainingGoals = Math.max(0, totalGoals - totalBalance);
+
+      // Skema Patungan Calculations
+      let totalSchemeAllocated = 0;
+      state.schemes.forEach((s) => {
+        if (s.type === "fixed") totalSchemeAllocated += s.value;
+        else if (s.type === "percent") totalSchemeAllocated += (s.value / 100) * totalGoals;
+      });
+      const splitDiff = totalGoals - totalSchemeAllocated;
+
+      // Update Dashboard UI
+      document.getElementById("dash-total-balance").innerText = formatRp(totalBalance);
+      document.getElementById("dash-total-income").innerText = formatRp(totalIncome);
+      document.getElementById("dash-total-expense").innerText = formatRp(totalExpense);
+      document.getElementById("dash-total-goals").innerText = formatRp(totalGoals);
+      document.getElementById("dash-remaining-goals").innerText = formatRp(remainingGoals);
+      document.getElementById("dash-split-diff").innerText = formatRp(splitDiff);
+
+      // Members List UI
+      const membersListEl = document.getElementById("dash-members-list");
+      const allMembers = Array.from(new Set([...state.schemes.map((s) => s.name), ...Object.keys(inputerIncome)]));
+      
+      if (allMembers.length === 0) {
+        membersListEl.innerHTML = `<p class="text-slate-400 text-xs">Belum ada data member/inputer.</p>`;
+      } else {
+        membersListEl.innerHTML = allMembers.map((m) => {
+          const scheme = state.schemes.find((s) => s.name.toLowerCase() === m.toLowerCase());
+          let targetObligation = 0;
+          if (scheme) {
+            targetObligation = scheme.type === "fixed" ? scheme.value : (scheme.value / 100) * totalGoals;
+          }
+          const paid = inputerIncome[m] || 0;
+          const sisaObligation = targetObligation - paid;
+
+          return `
+            <div class="flex justify-between items-center p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+              <div>
+                <p class="font-bold text-slate-800">${m}</p>
+                <span class="text-slate-400 text-[11px]">Telah setor: ${formatRp(paid)}</span>
+              </div>
+              <div class="text-right">
+                <span class="text-[10px] uppercase font-semibold text-slate-400">Sisa Patungan</span>
+                <p class="font-bold ${sisaObligation > 0 ? 'text-amber-600' : 'text-emerald-600'}">
+                  ${sisaObligation > 0 ? formatRp(sisaObligation) : "Lunas / Lebih"}
+                </p>
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      // Categories Breakdown UI
+      const catListEl = document.getElementById("dash-category-list");
+      const catKeys = Object.keys(catTotals);
+      if (catKeys.length === 0) {
+        catListEl.innerHTML = `<p class="text-slate-400 text-xs">Belum ada transaksi.</p>`;
+      } else {
+        catListEl.innerHTML = catKeys.map((c) => `
+          <div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg">
+            <span class="font-semibold text-slate-700">${c}</span>
+            <div class="flex gap-3 text-[11px]">
+              <span class="text-emerald-600">+${formatRp(catTotals[c].in)}</span>
+              <span class="text-rose-600">-${formatRp(catTotals[c].out)}</span>
+            </div>
+          </div>
+        `).join("");
+      }
+
+      // Goals List UI (Read, Update, Delete)
+      const goalsListEl = document.getElementById("goals-list");
+      goalsListEl.innerHTML = state.goals.length === 0
+        ? `<p class="text-slate-400 text-xs">Belum ada target goals.</p>`
+        : state.goals.map((g) => `
+          <div class="flex justify-between items-center p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+            <div>
+              <p class="font-semibold text-slate-800">${g.name}</p>
+              <span class="text-xs text-blue-600 font-bold">${formatRp(g.amount)}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="editGoal('${g.id}')" class="text-slate-400 hover:text-blue-600 p-1">
+                <i data-lucide="pencil" class="w-4 h-4"></i>
+              </button>
+              <button onclick="deleteGoal('${g.id}')" class="text-slate-400 hover:text-rose-500 p-1">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+        `).join("");
+
+      // Split Schemes List UI (Read, Update, Delete)
+      const schemesListEl = document.getElementById("split-schemes-list");
+      schemesListEl.innerHTML = state.schemes.length === 0
+        ? `<p class="text-slate-400 text-xs pt-2">Belum ada skema pembagian tersimpan.</p>`
+        : state.schemes.map((s) => `
+          <div class="flex justify-between items-center py-2">
+            <div>
+              <span class="font-semibold text-slate-800">${s.name}</span>
+              <span class="text-slate-400 text-[11px]"> (${s.type === 'fixed' ? 'Fixed Price' : 'Persentase'})</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-slate-700">${s.type === 'fixed' ? formatRp(s.value) : s.value + '%'}</span>
+              <button onclick="editScheme('${s.id}')" class="text-slate-400 hover:text-blue-600 p-1">
+                <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="deleteScheme('${s.id}')" class="text-slate-400 hover:text-rose-500 p-1">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+        `).join("");
+
+      // Transactions Ledger List UI (Read, Update, Delete)
+      const txListEl = document.getElementById("tx-list");
+      txListEl.innerHTML = state.transactions.length === 0
+        ? `<p class="text-slate-400 text-xs py-2">Belum ada transaksi di buku saldo.</p>`
+        : state.transactions.map((tx) => `
+          <div class="py-2.5 flex justify-between items-center">
+            <div>
+              <div class="flex items-center gap-1.5">
+                <span class="font-semibold text-slate-800">${tx.category}</span>
+                <span class="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">${tx.inputer}</span>
+              </div>
+              <span class="text-[10px] text-slate-400">${new Date(tx.date).toLocaleDateString("id-ID", { hour: '2-digit', minute: '2-digit' })}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="font-bold ${tx.type === 'income' ? 'text-emerald-600' : 'text-rose-600'}">
+                ${tx.type === 'income' ? '+' : '-'} ${formatRp(tx.amount)}
+              </span>
+              <button onclick="editTx('${tx.id}')" class="text-slate-400 hover:text-blue-600 p-1">
+                <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="deleteTx('${tx.id}')" class="text-slate-300 hover:text-rose-500 p-1">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+        `).join("");
+
+      lucide.createIcons();
+    }
+  </script>
+</body>
+</html>
