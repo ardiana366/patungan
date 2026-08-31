@@ -94,8 +94,10 @@
             <p id="dash-remaining-goals" class="font-bold text-amber-600 mt-1">Rp 0</p>
           </div>
         </div>
-        <div class="p-3 bg-amber-50 rounded-xl border border-amber-200/60 text-xs text-amber-800">
-          <span class="font-semibold">Selisih Target vs Skema Patungan:</span>
+
+        <!-- Notifikasi Selisih Skema Patungan -->
+        <div id="dash-split-diff-card" class="p-3 rounded-xl border text-xs flex items-center justify-between">
+          <span class="font-semibold text-slate-700">Status Skema Pembagian:</span>
           <span id="dash-split-diff" class="font-bold">Rp 0</span>
         </div>
       </div>
@@ -249,7 +251,7 @@
     </form>
   </dialog>
 
-  <!-- Modal 3: CRUD Transaksi Kas Popup (Dengan Ambil & Input Category) -->
+  <!-- Modal 3: CRUD Transaksi Kas Popup -->
   <dialog id="modal-tx" class="rounded-2xl p-5 backdrop:bg-black/40 shadow-xl w-11/12 max-w-md">
     <div class="flex justify-between items-center mb-3">
       <h3 id="modal-tx-title" class="font-bold text-slate-800 text-base">Catat Transaksi Kas</h3>
@@ -279,11 +281,9 @@
         </div>
       </div>
 
-      <!-- Kategori Dinamis: Ambil Category vs Input Baru -->
       <div>
         <label class="block text-xs font-semibold text-slate-500 mb-1">Kategori</label>
         <select id="tx-category-select" class="w-full px-3 py-2 border rounded-xl bg-slate-50" onchange="window.handleCategorySelectChange(this.value)">
-          <!-- Diisi otomatis oleh JavaScript -->
         </select>
         <input type="text" id="tx-category-custom" placeholder="Ketik nama kategori baru..." class="hidden w-full mt-2 px-3 py-2 border border-blue-300 rounded-xl bg-blue-50/50 text-xs focus:ring-1 focus:ring-blue-500" />
       </div>
@@ -316,13 +316,13 @@
     </div>
   </dialog>
 
-  <!-- ================= FIREBASE & APP SCRIPT (MODULE) ================= -->
+  <!-- ================= FIREBASE & APP SCRIPT ================= -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
     import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    // --- 1. FIREBASE CONFIGURATION ---
+    // 1. FIREBASE CONFIGURATION
     const firebaseConfig = {
       apiKey: "AIzaSyDVa10sAWiPADouahwBp1W5cV7_dqf0MSY",
       authDomain: "patungan-bc169.firebaseapp.com",
@@ -337,7 +337,7 @@
     const analytics = getAnalytics(app);
     const db = getFirestore(app);
 
-    // --- 2. STATE ---
+    // 2. STATE
     let currentUser = localStorage.getItem("patungan_user") || "";
     let currentRoom = localStorage.getItem("patungan_room") || "";
     let unsubscribeFirestore = null;
@@ -356,7 +356,7 @@
       return now.toISOString().slice(0, 16);
     };
 
-    // --- 3. INIT & AUTH ---
+    // 3. INIT & AUTH
     window.addEventListener("DOMContentLoaded", () => {
       lucide.createIcons();
       if (currentUser && currentRoom) {
@@ -398,7 +398,7 @@
       }
     };
 
-    // --- 4. FIRESTORE REAL-TIME LISTENER ---
+    // 4. FIRESTORE REAL-TIME LISTENER
     function listenToRoomData() {
       if (unsubscribeFirestore) unsubscribeFirestore();
 
@@ -433,7 +433,7 @@
       }
     }
 
-    // --- 5. TAB NAVIGATION ---
+    // 5. TAB NAVIGATION
     window.switchTab = function(tabId) {
       ["dashboard", "goals", "ledger"].forEach((t) => {
         document.getElementById(`tab-${t}`).classList.toggle("hidden", t !== tabId);
@@ -447,7 +447,7 @@
       lucide.createIcons();
     };
 
-    // --- 6. CRUD: GOALS (MODAL POPUP) ---
+    // 6. CRUD: GOALS
     window.openGoalModal = function() {
       document.getElementById("goal-id").value = "";
       document.getElementById("goal-name").value = "";
@@ -492,7 +492,7 @@
       }
     };
 
-    // --- 7. CRUD: SCHEMES (MODAL POPUP) ---
+    // 7. CRUD: SCHEMES
     window.openSchemeModal = function() {
       document.getElementById("scheme-id").value = "";
       document.getElementById("member-name-input").value = "";
@@ -544,11 +544,9 @@
       }
     };
 
-    // --- 8. CRUD: TRANSACTIONS & DYNAMIC CATEGORY POPUP ---
+    // 8. CRUD: TRANSACTIONS & CATEGORY
     function updateCategoryDropdown(selectedVal = "") {
       const selectEl = document.getElementById("tx-category-select");
-      
-      // Ambil kategori dari Goal Lists dan Master Categories
       const goalCategories = state.goals.map((g) => g.name);
       const combined = Array.from(new Set([...state.categories, ...goalCategories]));
 
@@ -639,7 +637,6 @@
       const inputer = document.getElementById("tx-inputer").value.trim();
       const date = new Date(document.getElementById("tx-datetime").value).toISOString();
 
-      // Penentuan nama kategori
       const selectVal = document.getElementById("tx-category-select").value;
       let category = selectVal;
       if (selectVal === "__NEW__" || !selectVal) {
@@ -650,7 +647,6 @@
         return;
       }
 
-      // Save category baru ke master list jika belum ada
       if (!state.categories.includes(category) && !state.goals.some(g => g.name.toLowerCase() === category.toLowerCase())) {
         state.categories.push(category);
       }
@@ -683,7 +679,7 @@
       }
     };
 
-    // --- 9. PERHITUNGAN & RENDER UI ---
+    // 9. PERHITUNGAN & RENDER UI
     function renderAll() {
       let totalIncome = 0;
       let totalExpense = 0;
@@ -706,12 +702,31 @@
       const totalGoals = state.goals.reduce((acc, g) => acc + g.amount, 0);
       const remainingGoals = Math.max(0, totalGoals - totalBalance);
 
-      let totalSchemeAllocated = 0;
+      // --- PERHITUNGAN HYBRID SKEMA (FIXED & PERCENTAGE) ---
+      let totalFixed = 0;
+      let totalPercent = 0;
+
       state.schemes.forEach((s) => {
-        if (s.type === "fixed") totalSchemeAllocated += s.value;
-        else if (s.type === "percent") totalSchemeAllocated += (s.value / 100) * totalGoals;
+        if (s.type === "fixed") totalFixed += s.value;
+        else if (s.type === "percent") totalPercent += s.value;
       });
-      const splitDiff = totalGoals - totalSchemeAllocated;
+
+      // Sisa goals yang harus dibagi menggunakan persentase
+      const remainingForPercent = Math.max(0, totalGoals - totalFixed);
+      let totalAllocated = totalFixed;
+
+      const memberObligations = {};
+      state.schemes.forEach((s) => {
+        if (s.type === "fixed") {
+          memberObligations[s.name.toLowerCase()] = s.value;
+        } else if (s.type === "percent") {
+          const nominalPercent = (s.value / 100) * (totalFixed > 0 ? remainingForPercent : totalGoals);
+          memberObligations[s.name.toLowerCase()] = nominalPercent;
+          totalAllocated += nominalPercent;
+        }
+      });
+
+      const diff = totalGoals - totalAllocated;
 
       // Dashboard View
       document.getElementById("dash-total-balance").innerText = formatRp(totalBalance);
@@ -719,7 +734,24 @@
       document.getElementById("dash-total-expense").innerText = formatRp(totalExpense);
       document.getElementById("dash-total-goals").innerText = formatRp(totalGoals);
       document.getElementById("dash-remaining-goals").innerText = formatRp(remainingGoals);
-      document.getElementById("dash-split-diff").innerText = formatRp(splitDiff);
+
+      // Format Notifikasi Selisih Sesuai JSON Mindmap
+      const diffCardEl = document.getElementById("dash-split-diff-card");
+      const diffTextEl = document.getElementById("dash-split-diff");
+
+      if (diff > 0) {
+        diffCardEl.className = "p-3 rounded-xl border border-amber-200/60 bg-amber-50 text-xs flex items-center justify-between";
+        diffTextEl.className = "font-bold text-amber-700";
+        diffTextEl.innerText = `Tinggal ${formatRp(diff)} lagi`;
+      } else if (diff < 0) {
+        diffCardEl.className = "p-3 rounded-xl border border-blue-200/60 bg-blue-50 text-xs flex items-center justify-between";
+        diffTextEl.className = "font-bold text-blue-700";
+        diffTextEl.innerText = `Wah ada lebih ${formatRp(Math.abs(diff))} nih`;
+      } else {
+        diffCardEl.className = "p-3 rounded-xl border border-emerald-200/60 bg-emerald-50 text-xs flex items-center justify-between";
+        diffTextEl.className = "font-bold text-emerald-700";
+        diffTextEl.innerText = "Pas (100%)";
+      }
 
       // Members Breakdown View
       const membersListEl = document.getElementById("dash-members-list");
@@ -729,11 +761,7 @@
         membersListEl.innerHTML = `<p class="text-slate-400 text-xs">Belum ada data member/inputer.</p>`;
       } else {
         membersListEl.innerHTML = allMembers.map((m) => {
-          const scheme = state.schemes.find((s) => s.name.toLowerCase() === m.toLowerCase());
-          let targetObligation = 0;
-          if (scheme) {
-            targetObligation = scheme.type === "fixed" ? scheme.value : (scheme.value / 100) * totalGoals;
-          }
+          const targetObligation = memberObligations[m.toLowerCase()] || 0;
           const paid = inputerIncome[m] || 0;
           const sisaObligation = targetObligation - paid;
 
@@ -741,12 +769,12 @@
             <div class="flex justify-between items-center p-2.5 bg-slate-50 rounded-xl border border-slate-100">
               <div>
                 <p class="font-bold text-slate-800">${m}</p>
-                <span class="text-slate-400 text-[11px]">Telah setor: ${formatRp(paid)}</span>
+                <span class="text-slate-400 text-[11px]">Telah setor: ${formatRp(paid)} / Target: ${formatRp(targetObligation)}</span>
               </div>
               <div class="text-right">
                 <span class="text-[10px] uppercase font-semibold text-slate-400">Sisa Patungan</span>
                 <p class="font-bold ${sisaObligation > 0 ? 'text-amber-600' : 'text-emerald-600'}">
-                  ${sisaObligation > 0 ? formatRp(sisaObligation) : "Lunas / Lebih"}
+                  ${sisaObligation > 0 ? formatRp(sisaObligation) : "OK"}
                 </p>
               </div>
             </div>
@@ -771,7 +799,7 @@
         `).join("");
       }
 
-      // Goals List View (CRUD via Modal)
+      // Goals List View
       const goalsListEl = document.getElementById("goals-list");
       goalsListEl.innerHTML = state.goals.length === 0
         ? `<p class="text-slate-400 text-xs">Belum ada target goals.</p>`
@@ -803,7 +831,7 @@
               <span class="text-slate-400 text-[11px]"> (${s.type === 'fixed' ? 'Fixed Price' : 'Persentase'})</span>
             </div>
             <div class="flex items-center gap-2">
-              <span class="font-bold text-slate-700">${s.type === 'fixed' ? formatRp(s.value) : s.value + '%'}</span>
+              <span class="font-bold text-slate-700">${s.type === 'fixed' ? formatRp(s.value) : s.value + '% (' + formatRp(memberObligations[s.name.toLowerCase()] || 0) + ')'}</span>
               <button onclick="window.editScheme('${s.id}')" class="text-slate-400 hover:text-blue-600 p-1">
                 <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
               </button>
