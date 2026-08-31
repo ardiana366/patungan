@@ -119,29 +119,29 @@
 
     <!-- Tab 2: Goals & Setup Pembagian -->
     <section id="tab-goals" class="p-4 space-y-4 max-w-2xl mx-auto hidden">
-      <!-- Form Input / Edit Goal -->
-      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
-        <h3 id="form-goal-title" class="font-bold text-slate-800 text-sm mb-3">Tambah Target (Goal)</h3>
-        <form id="form-goal" class="space-y-3 text-sm">
-          <input type="hidden" id="goal-id" value="" />
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <input type="text" id="goal-name" required placeholder="Nama Goal (misal: Sewa Villa)" class="px-3 py-2 border rounded-xl" />
-            <input type="number" id="goal-amount" required placeholder="Target Biaya (Rp)" class="px-3 py-2 border rounded-xl" />
-          </div>
-          <div class="flex gap-2">
-            <button type="submit" id="goal-submit-btn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-xl transition">Simpan Target</button>
-            <button type="button" id="goal-cancel-btn" onclick="window.resetGoalForm()" class="hidden px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-xl">Batal</button>
-          </div>
-        </form>
+      <!-- Header Action Goals -->
+      <div class="flex justify-between items-center bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+        <div>
+          <h3 class="font-bold text-slate-800 text-sm">Daftar Target (Goal Lists)</h3>
+          <p class="text-xs text-slate-500">Kelola daftar tujuan & biaya bersama</p>
+        </div>
+        <button onclick="window.openGoalModal()" class="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 shadow transition">
+          <i data-lucide="plus" class="w-4 h-4"></i> Tambah Goal
+        </button>
       </div>
 
-      <!-- Setup Pembagian Actions & Quick Summary -->
-      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex justify-between items-center">
+      <!-- Goals List -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+        <div id="goals-list" class="space-y-2 text-sm"></div>
+      </div>
+
+      <!-- Setup Pembagian Actions -->
+      <div class="flex justify-between items-center bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
         <div>
           <h3 class="font-bold text-slate-800 text-sm">Setup Pembagian Member</h3>
-          <p class="text-xs text-slate-500">Kelola patungan Fixed Price & Persentase</p>
+          <p class="text-xs text-slate-500">Kelola skema Fixed Price & Persentase</p>
         </div>
-        <button onclick="window.openSchemeModal()" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition">
+        <button onclick="window.openSchemeModal()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 shadow transition">
           <i data-lucide="sliders-horizontal" class="w-4 h-4"></i> Setup Skema
         </button>
       </div>
@@ -151,17 +151,11 @@
         <h3 class="font-bold text-slate-800 text-sm mb-2">Skema Pembagian Aktif</h3>
         <div id="split-schemes-list" class="divide-y text-xs"></div>
       </div>
-
-      <!-- Goals List -->
-      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
-        <h3 class="font-bold text-slate-800 text-sm mb-3">Daftar Target (Goal Lists)</h3>
-        <div id="goals-list" class="space-y-2 text-sm"></div>
-      </div>
     </section>
 
     <!-- Tab 3: Buku Saldo (Income / Expense) -->
     <section id="tab-ledger" class="p-4 space-y-4 max-w-2xl mx-auto hidden">
-      <!-- Header Action -->
+      <!-- Header Action Ledger -->
       <div class="flex justify-between items-center bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
         <div>
           <h3 class="font-bold text-slate-800 text-sm">Buku Saldo Kas</h3>
@@ -198,7 +192,32 @@
 
   <!-- ================= MODALS ================= -->
 
-  <!-- Modal: Setup Skema Pembagian Popup -->
+  <!-- Modal 1: CRUD Goal Lists Popup -->
+  <dialog id="modal-goal" class="rounded-2xl p-5 backdrop:bg-black/40 shadow-xl w-11/12 max-w-md">
+    <div class="flex justify-between items-center mb-3">
+      <h3 id="modal-goal-title" class="font-bold text-slate-800 text-base">Tambah Target (Goal)</h3>
+      <button onclick="document.getElementById('modal-goal').close()" class="text-slate-400 hover:text-slate-600">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    <form id="form-goal" class="space-y-3 text-sm">
+      <input type="hidden" id="goal-id" value="" />
+      <div>
+        <label class="block text-xs font-semibold text-slate-500 mb-1">Nama Goal</label>
+        <input type="text" id="goal-name" required placeholder="Contoh: Sewa Villa, Tiket Masuk" class="w-full px-3 py-2 border rounded-xl" />
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-500 mb-1">Target Biaya (Rp)</label>
+        <input type="number" id="goal-amount" required placeholder="Contoh: 1500000" class="w-full px-3 py-2 border rounded-xl" />
+      </div>
+      <div class="flex justify-end gap-2 pt-2 text-xs font-semibold">
+        <button type="button" onclick="document.getElementById('modal-goal').close()" class="px-4 py-2 border rounded-xl">Batal</button>
+        <button type="submit" id="goal-submit-btn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl">Simpan Target</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Modal 2: Setup Skema Pembagian Popup -->
   <dialog id="modal-scheme" class="rounded-2xl p-5 backdrop:bg-black/40 shadow-xl w-11/12 max-w-md">
     <div class="flex justify-between items-center mb-3">
       <h3 id="modal-scheme-title" class="font-bold text-slate-800 text-base">Setup Skema Pembagian</h3>
@@ -230,7 +249,7 @@
     </form>
   </dialog>
 
-  <!-- Modal: CRUD Transaksi Buku Saldo Popup -->
+  <!-- Modal 3: CRUD Transaksi Kas Popup -->
   <dialog id="modal-tx" class="rounded-2xl p-5 backdrop:bg-black/40 shadow-xl w-11/12 max-w-md">
     <div class="flex justify-between items-center mb-3">
       <h3 id="modal-tx-title" class="font-bold text-slate-800 text-base">Catat Transaksi Kas</h3>
@@ -278,12 +297,12 @@
 
       <div class="flex justify-end gap-2 pt-2 text-xs font-semibold">
         <button type="button" onclick="document.getElementById('modal-tx').close()" class="px-4 py-2 border rounded-xl">Batal</button>
-        <button type="submit" id="tx-submit-btn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl">Simpan</button>
+        <button type="submit" id="tx-submit-btn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl">Simpan Transaksi</button>
       </div>
     </form>
   </dialog>
 
-  <!-- Modal: Ganti Room -->
+  <!-- Modal 4: Ganti Room -->
   <dialog id="modal-room" class="rounded-2xl p-6 backdrop:bg-black/40 shadow-xl w-11/12 max-w-sm">
     <h3 class="font-bold text-slate-800 text-base mb-2">Ganti Book Room</h3>
     <input type="text" id="modal-room-input" class="w-full px-3 py-2 border rounded-xl uppercase text-sm mb-4" />
@@ -417,7 +436,27 @@
       lucide.createIcons();
     };
 
-    // --- 6. CRUD: GOALS ---
+    // --- 6. CRUD: GOALS (MODAL POPUP) ---
+    window.openGoalModal = function() {
+      document.getElementById("goal-id").value = "";
+      document.getElementById("goal-name").value = "";
+      document.getElementById("goal-amount").value = "";
+      document.getElementById("modal-goal-title").innerText = "Tambah Target (Goal)";
+      document.getElementById("goal-submit-btn").innerText = "Simpan Target";
+      document.getElementById("modal-goal").showModal();
+    };
+
+    window.editGoal = function(id) {
+      const g = state.goals.find((item) => item.id === id);
+      if (!g) return;
+      document.getElementById("goal-id").value = g.id;
+      document.getElementById("goal-name").value = g.name;
+      document.getElementById("goal-amount").value = g.amount;
+      document.getElementById("modal-goal-title").innerText = "Edit Target (Goal)";
+      document.getElementById("goal-submit-btn").innerText = "Update Target";
+      document.getElementById("modal-goal").showModal();
+    };
+
     document.getElementById("form-goal").addEventListener("submit", (e) => {
       e.preventDefault();
       const id = document.getElementById("goal-id").value;
@@ -431,36 +470,15 @@
         state.goals.push({ id: "g_" + Date.now(), name, amount });
       }
 
-      window.resetGoalForm();
+      document.getElementById("modal-goal").close();
       saveState();
     });
-
-    window.editGoal = function(id) {
-      const g = state.goals.find((item) => item.id === id);
-      if (!g) return;
-      document.getElementById("goal-id").value = g.id;
-      document.getElementById("goal-name").value = g.name;
-      document.getElementById("goal-amount").value = g.amount;
-      document.getElementById("form-goal-title").innerText = "Edit Target (Goal)";
-      document.getElementById("goal-submit-btn").innerText = "Update Target";
-      document.getElementById("goal-cancel-btn").classList.remove("hidden");
-      window.switchTab("goals");
-    };
 
     window.deleteGoal = function(id) {
       if (confirm("Hapus target ini?")) {
         state.goals = state.goals.filter((g) => g.id !== id);
         saveState();
       }
-    };
-
-    window.resetGoalForm = function() {
-      document.getElementById("goal-id").value = "";
-      document.getElementById("goal-name").value = "";
-      document.getElementById("goal-amount").value = "";
-      document.getElementById("form-goal-title").innerText = "Tambah Target (Goal)";
-      document.getElementById("goal-submit-btn").innerText = "Simpan Target";
-      document.getElementById("goal-cancel-btn").classList.add("hidden");
     };
 
     // --- 7. CRUD: SCHEMES (MODAL POPUP) ---
@@ -673,7 +691,7 @@
         `).join("");
       }
 
-      // Goals List View
+      // Goals List View (CRUD via Modal)
       const goalsListEl = document.getElementById("goals-list");
       goalsListEl.innerHTML = state.goals.length === 0
         ? `<p class="text-slate-400 text-xs">Belum ada target goals.</p>`
