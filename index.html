@@ -103,7 +103,7 @@
       <!-- Per-Inputer / Member Breakdown -->
       <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
         <h3 class="font-bold text-slate-800 text-sm mb-3 flex items-center gap-2">
-          <i data-lucide="users" class="w-4 h-4 text-blue-600"></i> Sisa Saldo / Patungan per Member
+          <i data-lucide="users" class="w-4 h-4 text-blue-600"></i> Saldo Akhir / Sisa per-Inputer
         </h3>
         <div id="dash-members-list" class="space-y-2 text-sm"></div>
       </div>
@@ -111,7 +111,7 @@
       <!-- Breakdown Kategori -->
       <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
         <h3 class="font-bold text-slate-800 text-sm mb-3 flex items-center gap-2">
-          <i data-lucide="pie-chart" class="w-4 h-4 text-blue-600"></i> Ringkasan per Kategori
+          <i data-lucide="pie-chart" class="w-4 h-4 text-blue-600"></i> Saldo Akhir Income & Expense per-Category
         </h3>
         <div id="dash-category-list" class="space-y-2 text-xs"></div>
       </div>
@@ -135,82 +135,46 @@
         </form>
       </div>
 
-      <!-- Setup / Edit Pembagian -->
-      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
-        <h3 id="form-scheme-title" class="font-bold text-slate-800 text-sm mb-1">Setup Skema Pembagian Member</h3>
-        <p class="text-xs text-slate-500 mb-3">Tentukan fixed price atau skema persentase patungan antar member.</p>
-        <form id="form-member-scheme" class="space-y-3 text-sm">
-          <input type="hidden" id="scheme-id" value="" />
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-            <input type="text" id="member-name-input" required placeholder="Nama Member" class="px-3 py-2 border rounded-xl" />
-            <select id="member-split-type" class="px-3 py-2 border rounded-xl">
-              <option value="fixed">Fixed Price (Rp)</option>
-              <option value="percent">Persentase (%)</option>
-            </select>
-            <input type="number" id="member-split-val" required placeholder="Nominal / %" class="px-3 py-2 border rounded-xl" />
-          </div>
-          <div class="flex gap-2">
-            <button type="submit" id="scheme-submit-btn" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-xl transition">Simpan Skema</button>
-            <button type="button" id="scheme-cancel-btn" onclick="window.resetSchemeForm()" class="hidden px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-xl">Batal</button>
-          </div>
-        </form>
+      <!-- Setup Pembagian Actions & Quick Summary -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex justify-between items-center">
+        <div>
+          <h3 class="font-bold text-slate-800 text-sm">Setup Pembagian Member</h3>
+          <p class="text-xs text-slate-500">Kelola patungan Fixed Price & Persentase</p>
+        </div>
+        <button onclick="window.openSchemeModal()" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 transition">
+          <i data-lucide="sliders-horizontal" class="w-4 h-4"></i> Setup Skema
+        </button>
+      </div>
 
-        <div id="split-schemes-list" class="mt-4 divide-y text-xs"></div>
+      <!-- Skema Tersimpan List -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+        <h3 class="font-bold text-slate-800 text-sm mb-2">Skema Pembagian Aktif</h3>
+        <div id="split-schemes-list" class="divide-y text-xs"></div>
       </div>
 
       <!-- Goals List -->
       <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
-        <h3 class="font-bold text-slate-800 text-sm mb-3">Daftar Target (Goals List)</h3>
+        <h3 class="font-bold text-slate-800 text-sm mb-3">Daftar Target (Goal Lists)</h3>
         <div id="goals-list" class="space-y-2 text-sm"></div>
       </div>
     </section>
 
     <!-- Tab 3: Buku Saldo (Income / Expense) -->
     <section id="tab-ledger" class="p-4 space-y-4 max-w-2xl mx-auto hidden">
-      <!-- Input / Edit Transaksi -->
-      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
-        <h3 id="form-tx-title" class="font-bold text-slate-800 text-sm mb-3">Catat Transaksi Buku Saldo</h3>
-        <form id="form-tx" class="space-y-3 text-sm">
-          <input type="hidden" id="tx-id" value="" />
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs text-slate-500 mb-1">Tipe</label>
-              <select id="tx-type" class="w-full px-3 py-2 border rounded-xl font-medium">
-                <option value="income">Income (+ Saldo Masuk)</option>
-                <option value="expense">Expense (- Pengeluaran)</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs text-slate-500 mb-1">Nominal (Rp)</label>
-              <input type="number" id="tx-amount" required placeholder="0" class="w-full px-3 py-2 border rounded-xl" />
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs text-slate-500 mb-1">Kategori</label>
-              <input type="text" id="tx-category" required placeholder="Konsumsi, Transport, etc" class="w-full px-3 py-2 border rounded-xl" />
-            </div>
-            <div>
-              <label class="block text-xs text-slate-500 mb-1">Inputer / Penyetor</label>
-              <input type="text" id="tx-inputer" required placeholder="Nama Orang" class="w-full px-3 py-2 border rounded-xl" />
-            </div>
-          </div>
-
-          <div class="flex gap-2">
-            <button type="submit" id="tx-submit-btn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl transition">
-              Simpan Transaksi
-            </button>
-            <button type="button" id="tx-cancel-btn" onclick="window.resetTxForm()" class="hidden px-4 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-xl">
-              Batal
-            </button>
-          </div>
-        </form>
+      <!-- Header Action -->
+      <div class="flex justify-between items-center bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+        <div>
+          <h3 class="font-bold text-slate-800 text-sm">Buku Saldo Kas</h3>
+          <p class="text-xs text-slate-500">Daftar catatan transaksi bersama</p>
+        </div>
+        <button onclick="window.openTxModal()" class="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 shadow transition">
+          <i data-lucide="plus" class="w-4 h-4"></i> Catat Transaksi
+        </button>
       </div>
 
-      <!-- Riwayat Transaksi -->
+      <!-- List Income / Expense -->
       <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
-        <h3 class="font-bold text-slate-800 text-sm mb-3">Riwayat Transaksi</h3>
+        <h3 class="font-bold text-slate-800 text-sm mb-3">Riwayat Transaksi (List Income/Expense)</h3>
         <div id="tx-list" class="divide-y space-y-2 text-xs"></div>
       </div>
     </section>
@@ -232,7 +196,94 @@
     </nav>
   </div>
 
-  <!-- Change Room Modal -->
+  <!-- ================= MODALS ================= -->
+
+  <!-- Modal: Setup Skema Pembagian Popup -->
+  <dialog id="modal-scheme" class="rounded-2xl p-5 backdrop:bg-black/40 shadow-xl w-11/12 max-w-md">
+    <div class="flex justify-between items-center mb-3">
+      <h3 id="modal-scheme-title" class="font-bold text-slate-800 text-base">Setup Skema Pembagian</h3>
+      <button onclick="document.getElementById('modal-scheme').close()" class="text-slate-400 hover:text-slate-600">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    <form id="form-member-scheme" class="space-y-3 text-sm">
+      <input type="hidden" id="scheme-id" value="" />
+      <div>
+        <label class="block text-xs font-semibold text-slate-500 mb-1">Nama Member</label>
+        <input type="text" id="member-name-input" required placeholder="Contoh: Ari" class="w-full px-3 py-2 border rounded-xl" />
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-500 mb-1">Tipe Pembagian</label>
+        <select id="member-split-type" class="w-full px-3 py-2 border rounded-xl">
+          <option value="fixed">Fixed Price (Rp)</option>
+          <option value="percent">Persentase (%)</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-500 mb-1">Nominal (Rp) / Persentase (%)</label>
+        <input type="number" id="member-split-val" required placeholder="Contoh: 250000 atau 25" class="w-full px-3 py-2 border rounded-xl" />
+      </div>
+      <div class="flex justify-end gap-2 pt-2 text-xs font-semibold">
+        <button type="button" onclick="document.getElementById('modal-scheme').close()" class="px-4 py-2 border rounded-xl">Batal</button>
+        <button type="submit" id="scheme-submit-btn" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl">Simpan Skema</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Modal: CRUD Transaksi Buku Saldo Popup -->
+  <dialog id="modal-tx" class="rounded-2xl p-5 backdrop:bg-black/40 shadow-xl w-11/12 max-w-md">
+    <div class="flex justify-between items-center mb-3">
+      <h3 id="modal-tx-title" class="font-bold text-slate-800 text-base">Catat Transaksi Kas</h3>
+      <button onclick="document.getElementById('modal-tx').close()" class="text-slate-400 hover:text-slate-600">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    <form id="form-tx" class="space-y-3 text-sm">
+      <input type="hidden" id="tx-id" value="" />
+      
+      <div>
+        <label class="block text-xs font-semibold text-slate-500 mb-1">Nama Income / Expense</label>
+        <input type="text" id="tx-title" required placeholder="Contoh: Beli Bensin, Setoran Awal" class="w-full px-3 py-2 border rounded-xl" />
+      </div>
+
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 mb-1">Tipe</label>
+          <select id="tx-type" class="w-full px-3 py-2 border rounded-xl font-medium">
+            <option value="income">Income (+ Saldo)</option>
+            <option value="expense">Expense (- Biaya)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 mb-1">Nominal (Rp)</label>
+          <input type="number" id="tx-amount" required placeholder="0" class="w-full px-3 py-2 border rounded-xl" />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 mb-1">Kategori</label>
+          <input type="text" id="tx-category" required placeholder="Konsumsi, Logistik" class="w-full px-3 py-2 border rounded-xl" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 mb-1">Inputers</label>
+          <input type="text" id="tx-inputer" required placeholder="Nama Orang" class="w-full px-3 py-2 border rounded-xl" />
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-500 mb-1">Date & Time</label>
+        <input type="datetime-local" id="tx-datetime" required class="w-full px-3 py-2 border rounded-xl text-xs" />
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2 text-xs font-semibold">
+        <button type="button" onclick="document.getElementById('modal-tx').close()" class="px-4 py-2 border rounded-xl">Batal</button>
+        <button type="submit" id="tx-submit-btn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl">Simpan</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Modal: Ganti Room -->
   <dialog id="modal-room" class="rounded-2xl p-6 backdrop:bg-black/40 shadow-xl w-11/12 max-w-sm">
     <h3 class="font-bold text-slate-800 text-base mb-2">Ganti Book Room</h3>
     <input type="text" id="modal-room-input" class="w-full px-3 py-2 border rounded-xl uppercase text-sm mb-4" />
@@ -275,6 +326,12 @@
 
     const formatRp = (num) => "Rp " + Number(num || 0).toLocaleString("id-ID");
 
+    const getLocalDateTime = () => {
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      return now.toISOString().slice(0, 16);
+    };
+
     // --- 3. INIT & AUTH ---
     window.addEventListener("DOMContentLoaded", () => {
       lucide.createIcons();
@@ -297,7 +354,6 @@
       document.getElementById("view-main").classList.remove("hidden");
       document.getElementById("header-room").firstElementChild.innerText = currentRoom;
       document.getElementById("header-user").innerText = currentUser;
-      document.getElementById("tx-inputer").value = currentUser;
       
       document.getElementById("header-room").onclick = () => {
         document.getElementById("modal-room-input").value = currentRoom;
@@ -318,7 +374,7 @@
       }
     };
 
-    // --- 4. DATA SYNC (FIRESTORE REAL-TIME LISTENER) ---
+    // --- 4. FIRESTORE REAL-TIME LISTENER ---
     function listenToRoomData() {
       if (unsubscribeFirestore) unsubscribeFirestore();
 
@@ -334,7 +390,7 @@
         }
         renderAll();
       }, (error) => {
-        console.error("Firestore Listen Error:", error);
+        console.error("Firestore Error:", error);
       });
     }
 
@@ -343,7 +399,7 @@
         const docRef = doc(db, "rooms", currentRoom);
         await setDoc(docRef, state, { merge: true });
       } catch (err) {
-        console.error("Gagal menyimpan ke Firestore:", err);
+        console.error("Gagal simpan ke Firestore:", err);
       }
     }
 
@@ -361,7 +417,7 @@
       lucide.createIcons();
     };
 
-    // --- 6. CRUD HANDLERS: GOALS ---
+    // --- 6. CRUD: GOALS ---
     document.getElementById("form-goal").addEventListener("submit", (e) => {
       e.preventDefault();
       const id = document.getElementById("goal-id").value;
@@ -407,7 +463,28 @@
       document.getElementById("goal-cancel-btn").classList.add("hidden");
     };
 
-    // --- 7. CRUD HANDLERS: SCHEMES ---
+    // --- 7. CRUD: SCHEMES (MODAL POPUP) ---
+    window.openSchemeModal = function() {
+      document.getElementById("scheme-id").value = "";
+      document.getElementById("member-name-input").value = "";
+      document.getElementById("member-split-val").value = "";
+      document.getElementById("modal-scheme-title").innerText = "Setup Skema Pembagian";
+      document.getElementById("scheme-submit-btn").innerText = "Simpan Skema";
+      document.getElementById("modal-scheme").showModal();
+    };
+
+    window.editScheme = function(id) {
+      const s = state.schemes.find((item) => item.id === id);
+      if (!s) return;
+      document.getElementById("scheme-id").value = s.id;
+      document.getElementById("member-name-input").value = s.name;
+      document.getElementById("member-split-type").value = s.type;
+      document.getElementById("member-split-val").value = s.value;
+      document.getElementById("modal-scheme-title").innerText = "Edit Skema Pembagian";
+      document.getElementById("scheme-submit-btn").innerText = "Update Skema";
+      document.getElementById("modal-scheme").showModal();
+    };
+
     document.getElementById("form-member-scheme").addEventListener("submit", (e) => {
       e.preventDefault();
       const id = document.getElementById("scheme-id").value;
@@ -427,22 +504,9 @@
         }
       }
 
-      window.resetSchemeForm();
+      document.getElementById("modal-scheme").close();
       saveState();
     });
-
-    window.editScheme = function(id) {
-      const s = state.schemes.find((item) => item.id === id);
-      if (!s) return;
-      document.getElementById("scheme-id").value = s.id;
-      document.getElementById("member-name-input").value = s.name;
-      document.getElementById("member-split-type").value = s.type;
-      document.getElementById("member-split-val").value = s.value;
-      document.getElementById("form-scheme-title").innerText = "Edit Skema Pembagian Member";
-      document.getElementById("scheme-submit-btn").innerText = "Update Skema";
-      document.getElementById("scheme-cancel-btn").classList.remove("hidden");
-      window.switchTab("goals");
-    };
 
     window.deleteScheme = function(id) {
       if (confirm("Hapus skema member ini?")) {
@@ -451,57 +515,68 @@
       }
     };
 
-    window.resetSchemeForm = function() {
-      document.getElementById("scheme-id").value = "";
-      document.getElementById("member-name-input").value = "";
-      document.getElementById("member-split-val").value = "";
-      document.getElementById("form-scheme-title").innerText = "Setup Skema Pembagian Member";
-      document.getElementById("scheme-submit-btn").innerText = "Simpan Skema";
-      document.getElementById("scheme-cancel-btn").classList.add("hidden");
+    // --- 8. CRUD: TRANSACTIONS (MODAL POPUP) ---
+    window.openTxModal = function() {
+      document.getElementById("tx-id").value = "";
+      document.getElementById("tx-title").value = "";
+      document.getElementById("tx-amount").value = "";
+      document.getElementById("tx-category").value = "";
+      document.getElementById("tx-inputer").value = currentUser;
+      document.getElementById("tx-datetime").value = getLocalDateTime();
+      document.getElementById("modal-tx-title").innerText = "Catat Transaksi Kas";
+      document.getElementById("tx-submit-btn").innerText = "Simpan Transaksi";
+      document.getElementById("modal-tx").showModal();
     };
-
-    // --- 8. CRUD HANDLERS: TRANSACTIONS ---
-    document.getElementById("form-tx").addEventListener("submit", (e) => {
-      e.preventDefault();
-      const id = document.getElementById("tx-id").value;
-      const type = document.getElementById("tx-type").value;
-      const amount = Number(document.getElementById("tx-amount").value);
-      const category = document.getElementById("tx-category").value.trim();
-      const inputer = document.getElementById("tx-inputer").value.trim();
-
-      if (id) {
-        const idx = state.transactions.findIndex((tx) => tx.id === id);
-        if (idx !== -1) {
-          state.transactions[idx] = { ...state.transactions[idx], type, amount, category, inputer };
-        }
-      } else {
-        state.transactions.unshift({
-          id: "tx_" + Date.now(),
-          type,
-          amount,
-          category,
-          inputer,
-          date: new Date().toISOString()
-        });
-      }
-
-      window.resetTxForm();
-      saveState();
-    });
 
     window.editTx = function(id) {
       const tx = state.transactions.find((item) => item.id === id);
       if (!tx) return;
       document.getElementById("tx-id").value = tx.id;
+      document.getElementById("tx-title").value = tx.title || tx.category;
       document.getElementById("tx-type").value = tx.type;
       document.getElementById("tx-amount").value = tx.amount;
       document.getElementById("tx-category").value = tx.category;
       document.getElementById("tx-inputer").value = tx.inputer;
-      document.getElementById("form-tx-title").innerText = "Edit Transaksi Buku Saldo";
+      
+      const dt = tx.date ? new Date(tx.date) : new Date();
+      dt.setMinutes(dt.getMinutes() - dt.getTimezoneOffset());
+      document.getElementById("tx-datetime").value = dt.toISOString().slice(0, 16);
+
+      document.getElementById("modal-tx-title").innerText = "Edit Transaksi Kas";
       document.getElementById("tx-submit-btn").innerText = "Update Transaksi";
-      document.getElementById("tx-cancel-btn").classList.remove("hidden");
-      window.switchTab("ledger");
+      document.getElementById("modal-tx").showModal();
     };
+
+    document.getElementById("form-tx").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const id = document.getElementById("tx-id").value;
+      const title = document.getElementById("tx-title").value.trim();
+      const type = document.getElementById("tx-type").value;
+      const amount = Number(document.getElementById("tx-amount").value);
+      const category = document.getElementById("tx-category").value.trim();
+      const inputer = document.getElementById("tx-inputer").value.trim();
+      const date = new Date(document.getElementById("tx-datetime").value).toISOString();
+
+      if (id) {
+        const idx = state.transactions.findIndex((tx) => tx.id === id);
+        if (idx !== -1) {
+          state.transactions[idx] = { ...state.transactions[idx], title, type, amount, category, inputer, date };
+        }
+      } else {
+        state.transactions.unshift({
+          id: "tx_" + Date.now(),
+          title,
+          type,
+          amount,
+          category,
+          inputer,
+          date
+        });
+      }
+
+      document.getElementById("modal-tx").close();
+      saveState();
+    });
 
     window.deleteTx = function(id) {
       if (confirm("Hapus transaksi ini?")) {
@@ -510,17 +585,7 @@
       }
     };
 
-    window.resetTxForm = function() {
-      document.getElementById("tx-id").value = "";
-      document.getElementById("tx-amount").value = "";
-      document.getElementById("tx-category").value = "";
-      document.getElementById("tx-inputer").value = currentUser;
-      document.getElementById("form-tx-title").innerText = "Catat Transaksi Buku Saldo";
-      document.getElementById("tx-submit-btn").innerText = "Simpan Transaksi";
-      document.getElementById("tx-cancel-btn").classList.add("hidden");
-    };
-
-    // --- 9. CALCULATIONS & RENDERING ---
+    // --- 9. PERHITUNGAN & RENDER UI ---
     function renderAll() {
       let totalIncome = 0;
       let totalExpense = 0;
@@ -550,7 +615,7 @@
       });
       const splitDiff = totalGoals - totalSchemeAllocated;
 
-      // Dashboard UI
+      // Dashboard View
       document.getElementById("dash-total-balance").innerText = formatRp(totalBalance);
       document.getElementById("dash-total-income").innerText = formatRp(totalIncome);
       document.getElementById("dash-total-expense").innerText = formatRp(totalExpense);
@@ -558,7 +623,7 @@
       document.getElementById("dash-remaining-goals").innerText = formatRp(remainingGoals);
       document.getElementById("dash-split-diff").innerText = formatRp(splitDiff);
 
-      // Members Breakdown UI
+      // Members Breakdown View
       const membersListEl = document.getElementById("dash-members-list");
       const allMembers = Array.from(new Set([...state.schemes.map((s) => s.name), ...Object.keys(inputerIncome)]));
       
@@ -591,7 +656,7 @@
         }).join("");
       }
 
-      // Categories UI
+      // Categories Breakdown View
       const catListEl = document.getElementById("dash-category-list");
       const catKeys = Object.keys(catTotals);
       if (catKeys.length === 0) {
@@ -608,7 +673,7 @@
         `).join("");
       }
 
-      // Goals List UI
+      // Goals List View
       const goalsListEl = document.getElementById("goals-list");
       goalsListEl.innerHTML = state.goals.length === 0
         ? `<p class="text-slate-400 text-xs">Belum ada target goals.</p>`
@@ -629,10 +694,10 @@
           </div>
         `).join("");
 
-      // Schemes List UI
+      // Schemes List View
       const schemesListEl = document.getElementById("split-schemes-list");
       schemesListEl.innerHTML = state.schemes.length === 0
-        ? `<p class="text-slate-400 text-xs pt-2">Belum ada skema pembagian tersimpan.</p>`
+        ? `<p class="text-slate-400 text-xs py-2">Belum ada skema pembagian tersimpan.</p>`
         : state.schemes.map((s) => `
           <div class="flex justify-between items-center py-2">
             <div>
@@ -651,7 +716,7 @@
           </div>
         `).join("");
 
-      // Ledger List UI
+      // List Income / Expense View
       const txListEl = document.getElementById("tx-list");
       txListEl.innerHTML = state.transactions.length === 0
         ? `<p class="text-slate-400 text-xs py-2">Belum ada transaksi di buku saldo.</p>`
@@ -659,10 +724,14 @@
           <div class="py-2.5 flex justify-between items-center">
             <div>
               <div class="flex items-center gap-1.5">
-                <span class="font-semibold text-slate-800">${tx.category}</span>
-                <span class="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">${tx.inputer}</span>
+                <span class="font-bold text-slate-800 text-xs">${tx.title || tx.category}</span>
+                <span class="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-medium">${tx.category}</span>
               </div>
-              <span class="text-[10px] text-slate-400">${new Date(tx.date).toLocaleDateString("id-ID", { hour: '2-digit', minute: '2-digit' })}</span>
+              <div class="flex items-center gap-2 mt-0.5 text-[10px] text-slate-400">
+                <span>By: <strong class="text-slate-600">${tx.inputer}</strong></span>
+                <span>•</span>
+                <span>${new Date(tx.date).toLocaleDateString("id-ID", { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+              </div>
             </div>
             <div class="flex items-center gap-2">
               <span class="font-bold ${tx.type === 'income' ? 'text-emerald-600' : 'text-rose-600'}">
