@@ -702,25 +702,17 @@
       const totalGoals = state.goals.reduce((acc, g) => acc + g.amount, 0);
       const remainingGoals = Math.max(0, totalGoals - totalBalance);
 
-      // --- PERHITUNGAN HYBRID SKEMA (FIXED & PERCENTAGE) ---
-      let totalFixed = 0;
-      let totalPercent = 0;
-
-      state.schemes.forEach((s) => {
-        if (s.type === "fixed") totalFixed += s.value;
-        else if (s.type === "percent") totalPercent += s.value;
-      });
-
-      // Sisa goals yang harus dibagi menggunakan persentase
-      const remainingForPercent = Math.max(0, totalGoals - totalFixed);
-      let totalAllocated = totalFixed;
-
+      // --- PERHITUNGAN SKEMA (100% PERSENTASE DARI TOTAL GOALS) ---
+      let totalAllocated = 0;
       const memberObligations = {};
+
       state.schemes.forEach((s) => {
         if (s.type === "fixed") {
           memberObligations[s.name.toLowerCase()] = s.value;
+          totalAllocated += s.value;
         } else if (s.type === "percent") {
-          const nominalPercent = (s.value / 100) * (totalFixed > 0 ? remainingForPercent : totalGoals);
+          // Persentase dihitung langsung 100% dari Total Goals
+          const nominalPercent = (s.value / 100) * totalGoals;
           memberObligations[s.name.toLowerCase()] = nominalPercent;
           totalAllocated += nominalPercent;
         }
