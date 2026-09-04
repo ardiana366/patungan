@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="theme-color" content="#2563eb" />
-  <title>Aplikasi Patungan</title>
+  <title>Aplikasi Patungan & Budget</title>
   
   <!-- Tailwind CSS & Lucide Icons -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -26,7 +26,7 @@
           <i data-lucide="wallet" class="w-8 h-8"></i>
         </div>
         <h1 class="text-2xl font-bold text-slate-900">Aplikasi Patungan</h1>
-        <p class="text-sm text-slate-500 mt-1">Kelola target & buku kas bersama via Firestore</p>
+        <p class="text-sm text-slate-500 mt-1">Kelola budget & buku kas bersama via Firestore</p>
       </div>
 
       <form id="form-login" class="space-y-4">
@@ -79,25 +79,25 @@
         </div>
       </div>
 
-      <!-- Sisa Patungan Goals -->
+      <!-- Sisa Patungan Budget -->
       <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-3">
         <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
-          <i data-lucide="target" class="w-4 h-4 text-blue-600"></i> Target & Sisa Pembagian
+          <i data-lucide="target" class="w-4 h-4 text-blue-600"></i> Alokasi Budget & Sisa Kas
         </h3>
         <div class="grid grid-cols-2 gap-3 text-sm">
           <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
-            <span class="text-xs text-slate-500">Total Nilai Target (Goals)</span>
+            <span class="text-xs text-slate-500">Total Budget (Kebutuhan)</span>
             <p id="dash-total-goals" class="font-bold text-slate-800 mt-1">Rp 0</p>
           </div>
           <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
-            <span class="text-xs text-slate-500">Sisa Kurang ke Target</span>
+            <span class="text-xs text-slate-500">Kurang Kas ke Budget</span>
             <p id="dash-remaining-goals" class="font-bold text-amber-600 mt-1">Rp 0</p>
           </div>
         </div>
 
         <!-- Notifikasi Selisih Skema Patungan -->
         <div id="dash-split-diff-card" class="p-3 rounded-xl border text-xs flex items-center justify-between">
-          <span class="font-semibold text-slate-700">Status Skema Pembagian:</span>
+          <span class="font-semibold text-slate-700">Status Skema Patungan:</span>
           <span id="dash-split-diff" class="font-bold">Rp 0</span>
         </div>
       </div>
@@ -105,7 +105,7 @@
       <!-- Per-Inputer / Member Breakdown -->
       <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
         <h3 class="font-bold text-slate-800 text-sm mb-3 flex items-center gap-2">
-          <i data-lucide="users" class="w-4 h-4 text-blue-600"></i> Saldo Akhir / Sisa per-Inputer
+          <i data-lucide="users" class="w-4 h-4 text-blue-600"></i> Setoran & Sisa Patungan per-Member
         </h3>
         <div id="dash-members-list" class="space-y-2 text-sm"></div>
       </div>
@@ -113,26 +113,26 @@
       <!-- Breakdown Kategori -->
       <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
         <h3 class="font-bold text-slate-800 text-sm mb-3 flex items-center gap-2">
-          <i data-lucide="pie-chart" class="w-4 h-4 text-blue-600"></i> Saldo Akhir Income & Expense per-Category
+          <i data-lucide="pie-chart" class="w-4 h-4 text-blue-600"></i> Arus Kas per-Kategori
         </h3>
         <div id="dash-category-list" class="space-y-2 text-xs"></div>
       </div>
     </section>
 
-    <!-- Tab 2: Goals & Setup Pembagian -->
+    <!-- Tab 2: Budget & Setup Pembagian -->
     <section id="tab-goals" class="p-4 space-y-4 max-w-2xl mx-auto hidden">
-      <!-- Header Action Goals -->
+      <!-- Header Action Budget -->
       <div class="flex justify-between items-center bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
         <div>
-          <h3 class="font-bold text-slate-800 text-sm">Daftar Target (Goal Lists)</h3>
-          <p class="text-xs text-slate-500">Kelola daftar target dan pantau realisasinya</p>
+          <h3 class="font-bold text-slate-800 text-sm">Daftar Budget (Anggaran)</h3>
+          <p class="text-xs text-slate-500">Pantau pemakaian belanja vs alokasi budget</p>
         </div>
         <button onclick="window.openGoalModal()" class="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 shadow transition">
-          <i data-lucide="plus" class="w-4 h-4"></i> Tambah Goal
+          <i data-lucide="plus" class="w-4 h-4"></i> Tambah Budget
         </button>
       </div>
 
-      <!-- Goals List (Dengan Realisasi Sisa Saldo per-Goal) -->
+      <!-- Budget List (Progress Expense, Hemat, Boros) -->
       <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
         <div id="goals-list" class="space-y-3 text-sm"></div>
       </div>
@@ -141,7 +141,7 @@
       <div class="flex justify-between items-center bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
         <div>
           <h3 class="font-bold text-slate-800 text-sm">Setup Pembagian Member</h3>
-          <p class="text-xs text-slate-500">Kelola skema Fixed Price & Persentase</p>
+          <p class="text-xs text-slate-500">Skema patungan menanggung Total Budget</p>
         </div>
         <button onclick="window.openSchemeModal()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 shadow transition">
           <i data-lucide="sliders-horizontal" class="w-4 h-4"></i> Setup Skema
@@ -157,20 +157,18 @@
 
     <!-- Tab 3: Buku Saldo (Income / Expense) -->
     <section id="tab-ledger" class="p-4 space-y-4 max-w-2xl mx-auto hidden">
-      <!-- Header Action Ledger -->
       <div class="flex justify-between items-center bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
         <div>
           <h3 class="font-bold text-slate-800 text-sm">Buku Saldo Kas</h3>
-          <p class="text-xs text-slate-500">Daftar catatan transaksi bersama</p>
+          <p class="text-xs text-slate-500">Catatan mutasi pemasukan & pengeluaran</p>
         </div>
         <button onclick="window.openTxModal()" class="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 shadow transition">
           <i data-lucide="plus" class="w-4 h-4"></i> Catat Transaksi
         </button>
       </div>
 
-      <!-- List Income / Expense -->
       <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
-        <h3 class="font-bold text-slate-800 text-sm mb-3">Riwayat Transaksi (List Income/Expense)</h3>
+        <h3 class="font-bold text-slate-800 text-sm mb-3">Riwayat Transaksi</h3>
         <div id="tx-list" class="divide-y space-y-2 text-xs"></div>
       </div>
     </section>
@@ -182,8 +180,8 @@
         <span>Dashboard</span>
       </button>
       <button onclick="window.switchTab('goals')" id="nav-btn-goals" class="flex flex-col items-center text-slate-400 text-xs py-1">
-        <i data-lucide="target" class="w-5 h-5"></i>
-        <span>Goals</span>
+        <i data-lucide="badge-dollar-sign" class="w-5 h-5"></i>
+        <span>Budget</span>
       </button>
       <button onclick="window.switchTab('ledger')" id="nav-btn-ledger" class="flex flex-col items-center text-slate-400 text-xs py-1">
         <i data-lucide="book-open" class="w-5 h-5"></i>
@@ -194,10 +192,10 @@
 
   <!-- ================= MODALS ================= -->
 
-  <!-- Modal 1: CRUD Goal Lists Popup -->
+  <!-- Modal 1: CRUD Budget Lists Popup -->
   <dialog id="modal-goal" class="rounded-2xl p-5 backdrop:bg-black/40 shadow-xl w-11/12 max-w-md">
     <div class="flex justify-between items-center mb-3">
-      <h3 id="modal-goal-title" class="font-bold text-slate-800 text-base">Tambah Target (Goal)</h3>
+      <h3 id="modal-goal-title" class="font-bold text-slate-800 text-base">Tambah Budget</h3>
       <button onclick="document.getElementById('modal-goal').close()" class="text-slate-400 hover:text-slate-600">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
@@ -205,16 +203,16 @@
     <form id="form-goal" class="space-y-3 text-sm">
       <input type="hidden" id="goal-id" value="" />
       <div>
-        <label class="block text-xs font-semibold text-slate-500 mb-1">Nama Goal</label>
-        <input type="text" id="goal-name" required placeholder="Contoh: Sewa Villa, Tiket Masuk" class="w-full px-3 py-2 border rounded-xl" />
+        <label class="block text-xs font-semibold text-slate-500 mb-1">Nama Budget</label>
+        <input type="text" id="goal-name" required placeholder="Contoh: Sewa Villa, Belanja BBQ, Bensin" class="w-full px-3 py-2 border rounded-xl" />
       </div>
       <div>
-        <label class="block text-xs font-semibold text-slate-500 mb-1">Target Biaya (Rp)</label>
+        <label class="block text-xs font-semibold text-slate-500 mb-1">Nominal Anggaran (Rp)</label>
         <input type="number" id="goal-amount" required placeholder="Contoh: 1500000" class="w-full px-3 py-2 border rounded-xl" />
       </div>
       <div class="flex justify-end gap-2 pt-2 text-xs font-semibold">
         <button type="button" onclick="document.getElementById('modal-goal').close()" class="px-4 py-2 border rounded-xl">Batal</button>
-        <button type="submit" id="goal-submit-btn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl">Simpan Target</button>
+        <button type="submit" id="goal-submit-btn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl">Simpan Budget</button>
       </div>
     </form>
   </dialog>
@@ -264,15 +262,15 @@
       
       <div>
         <label class="block text-xs font-semibold text-slate-500 mb-1">Nama Income / Expense</label>
-        <input type="text" id="tx-title" required placeholder="Contoh: Beli Bensin, Setoran Villa" class="w-full px-3 py-2 border rounded-xl" />
+        <input type="text" id="tx-title" required placeholder="Contoh: Beli Bensin, Setoran Awal" class="w-full px-3 py-2 border rounded-xl" />
       </div>
 
       <div class="grid grid-cols-2 gap-2">
         <div>
           <label class="block text-xs font-semibold text-slate-500 mb-1">Tipe</label>
           <select id="tx-type" class="w-full px-3 py-2 border rounded-xl font-medium">
-            <option value="income">Income (+ Saldo)</option>
-            <option value="expense">Expense (- Biaya)</option>
+            <option value="expense">Expense (- Pengeluaran)</option>
+            <option value="income">Income (+ Saldo Masuk)</option>
           </select>
         </div>
         <div>
@@ -342,7 +340,7 @@
     let currentRoom = localStorage.getItem("patungan_room") || "";
     let unsubscribeFirestore = null;
     let state = {
-      goals: [],
+      goals: [], // Berperan sebagai master item Budget
       schemes: [],
       categories: ["Umum", "Konsumsi", "Transportasi", "Penginapan"],
       transactions: []
@@ -447,13 +445,13 @@
       lucide.createIcons();
     };
 
-    // 6. CRUD: GOALS
+    // 6. CRUD: BUDGET (GOALS)
     window.openGoalModal = function() {
       document.getElementById("goal-id").value = "";
       document.getElementById("goal-name").value = "";
       document.getElementById("goal-amount").value = "";
-      document.getElementById("modal-goal-title").innerText = "Tambah Target (Goal)";
-      document.getElementById("goal-submit-btn").innerText = "Simpan Target";
+      document.getElementById("modal-goal-title").innerText = "Tambah Budget";
+      document.getElementById("goal-submit-btn").innerText = "Simpan Budget";
       document.getElementById("modal-goal").showModal();
     };
 
@@ -463,8 +461,8 @@
       document.getElementById("goal-id").value = g.id;
       document.getElementById("goal-name").value = g.name;
       document.getElementById("goal-amount").value = g.amount;
-      document.getElementById("modal-goal-title").innerText = "Edit Target (Goal)";
-      document.getElementById("goal-submit-btn").innerText = "Update Target";
+      document.getElementById("modal-goal-title").innerText = "Edit Budget";
+      document.getElementById("goal-submit-btn").innerText = "Update Budget";
       document.getElementById("modal-goal").showModal();
     };
 
@@ -486,7 +484,7 @@
     });
 
     window.deleteGoal = function(id) {
-      if (confirm("Hapus target ini?")) {
+      if (confirm("Hapus pos budget ini?")) {
         state.goals = state.goals.filter((g) => g.id !== id);
         saveState();
       }
@@ -547,14 +545,14 @@
     // 8. CRUD: TRANSACTIONS & CATEGORY
     function updateCategoryDropdown(selectedVal = "") {
       const selectEl = document.getElementById("tx-category-select");
-      const goalCategories = state.goals.map((g) => g.name);
-      const combined = Array.from(new Set([...state.categories, ...goalCategories]));
+      const budgetCategories = state.goals.map((g) => g.name);
+      const combined = Array.from(new Set([...state.categories, ...budgetCategories]));
 
       let optionsHtml = `<option value="" disabled ${!selectedVal ? 'selected' : ''}>-- Pilih Kategori --</option>`;
       
-      if (goalCategories.length > 0) {
-        optionsHtml += `<optgroup label="Dari Goal Lists (Tautkan ke Target)">`;
-        goalCategories.forEach((g) => {
+      if (budgetCategories.length > 0) {
+        optionsHtml += `<optgroup label="Dari Daftar Budget (Pemakaian Budget)">`;
+        budgetCategories.forEach((g) => {
           optionsHtml += `<option value="${g}">${g}</option>`;
         });
         optionsHtml += `</optgroup>`;
@@ -699,10 +697,10 @@
       });
 
       const totalBalance = totalIncome - totalExpense;
-      const totalGoals = state.goals.reduce((acc, g) => acc + g.amount, 0);
-      const remainingGoals = Math.max(0, totalGoals - totalBalance);
+      const totalBudget = state.goals.reduce((acc, g) => acc + g.amount, 0);
+      const remainingGoals = Math.max(0, totalBudget - totalBalance);
 
-      // --- PERHITUNGAN SKEMA (100% PERSENTASE DARI TOTAL GOALS) ---
+      // Skema Patungan (100% Persentase dari Total Budget)[span_0](start_span)[span_0](end_span)
       let totalAllocated = 0;
       const memberObligations = {};
 
@@ -711,33 +709,33 @@
           memberObligations[s.name.toLowerCase()] = s.value;
           totalAllocated += s.value;
         } else if (s.type === "percent") {
-          const nominalPercent = (s.value / 100) * totalGoals;
+          const nominalPercent = (s.value / 100) * totalBudget;
           memberObligations[s.name.toLowerCase()] = nominalPercent;
           totalAllocated += nominalPercent;
         }
       });
 
-      const diff = totalGoals - totalAllocated;
+      const diff = totalBudget - totalAllocated;
 
       // Dashboard View
       document.getElementById("dash-total-balance").innerText = formatRp(totalBalance);
       document.getElementById("dash-total-income").innerText = formatRp(totalIncome);
       document.getElementById("dash-total-expense").innerText = formatRp(totalExpense);
-      document.getElementById("dash-total-goals").innerText = formatRp(totalGoals);
+      document.getElementById("dash-total-goals").innerText = formatRp(totalBudget);
       document.getElementById("dash-remaining-goals").innerText = formatRp(remainingGoals);
 
-      // Format Notifikasi Selisih Sesuai JSON Mindmap
+      // Notifikasi Selisih Skema vs Total Budget[span_1](start_span)[span_1](end_span)
       const diffCardEl = document.getElementById("dash-split-diff-card");
       const diffTextEl = document.getElementById("dash-split-diff");
 
       if (diff > 0) {
         diffCardEl.className = "p-3 rounded-xl border border-amber-200/60 bg-amber-50 text-xs flex items-center justify-between";
         diffTextEl.className = "font-bold text-amber-700";
-        diffTextEl.innerText = `Tinggal ${formatRp(diff)} lagi`;
+        diffTextEl.innerText = `Tinggal ${formatRp(diff)} lagi`; //[span_2](start_span)[span_2](end_span)
       } else if (diff < 0) {
         diffCardEl.className = "p-3 rounded-xl border border-blue-200/60 bg-blue-50 text-xs flex items-center justify-between";
         diffTextEl.className = "font-bold text-blue-700";
-        diffTextEl.innerText = `Wah ada lebih ${formatRp(Math.abs(diff))} nih`;
+        diffTextEl.innerText = `Wah ada lebih ${formatRp(Math.abs(diff))} nih`; //[span_3](start_span)[span_3](end_span)
       } else {
         diffCardEl.className = "p-3 rounded-xl border border-emerald-200/60 bg-emerald-50 text-xs flex items-center justify-between";
         diffTextEl.className = "font-bold text-emerald-700";
@@ -790,26 +788,24 @@
         `).join("");
       }
 
-      // Goals List View (Dengan Fitur: Kategori = Nama Goal List -> Sisa Menuju List Tersebut)
+      // Budget List View: Expense menaikkan progress bar + Indikator Hemat/Boros
       const goalsListEl = document.getElementById("goals-list");
       if (state.goals.length === 0) {
-        goalsListEl.innerHTML = `<p class="text-slate-400 text-xs">Belum ada target goals.</p>`;
+        goalsListEl.innerHTML = `<p class="text-slate-400 text-xs">Belum ada alokasi budget tersimpan.</p>`;
       } else {
         goalsListEl.innerHTML = state.goals.map((g) => {
-          // Cari saldo transaksi spesifik untuk nama kategori ini
           const goalCat = catTotals[g.name] || { in: 0, out: 0 };
-          const goalCurrentFunds = goalCat.in - goalCat.out; // dana bersih yang teralokasi
-          const sisaMenujuGoal = g.amount - goalCurrentFunds;
-          const percentProgress = Math.min(100, Math.max(0, Math.round((goalCurrentFunds / g.amount) * 100)));
+          const spentExpense = goalCat.out; // Pengeluaran menaikkan progress bar
+          const percentProgress = Math.round((spentExpense / g.amount) * 100) || 0;
+          const isOverBudget = spentExpense > g.amount;
+          const diffAmount = Math.abs(g.amount - spentExpense);
 
           return `
             <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
-              <div class="flex justify-between items-start">
+              <div class="flex justify-between items-center">
                 <div>
                   <span class="font-bold text-slate-800 text-sm">${g.name}</span>
-                  <div class="text-xs text-slate-500 mt-0.5">
-                    Target: <strong class="text-slate-700">${formatRp(g.amount)}</strong>
-                  </div>
+                  <span class="text-xs text-slate-400 font-medium ml-1">(${formatRp(g.amount)})</span>
                 </div>
                 <div class="flex items-center gap-1">
                   <button onclick="window.editGoal('${g.id}')" class="text-slate-400 hover:text-blue-600 p-1">
@@ -821,15 +817,18 @@
                 </div>
               </div>
 
-              <!-- Bar Progres Pengumpulan Realtime -->
+              <!-- Bar Progres Penggunaan Budget (Expense) -->
               <div class="space-y-1">
                 <div class="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
-                  <div class="bg-blue-600 h-1.5 rounded-full transition-all duration-300" style="width: ${percentProgress}%"></div>
+                  <div class="${isOverBudget ? 'bg-rose-500' : 'bg-blue-600'} h-1.5 rounded-full transition-all duration-300" style="width: ${Math.min(100, percentProgress)}%"></div>
                 </div>
-                <div class="flex justify-between items-center text-[11px] pt-1">
-                  <span class="text-slate-500">Teralokasi: <strong class="text-slate-700">${formatRp(goalCurrentFunds)}</strong> (${percentProgress}%)</span>
-                  <span class="font-semibold ${sisaMenujuGoal > 0 ? 'text-amber-600' : 'text-emerald-600'}">
-                    ${sisaMenujuGoal > 0 ? `Sisa menuju list: ${formatRp(sisaMenujuGoal)}` : 'Goal Terpenuhi!'}
+                
+                <div class="flex justify-between items-center text-[10px] pt-0.5">
+                  <span class="text-slate-500">Terpakai: <strong class="text-slate-700">${formatRp(spentExpense)}</strong> (${percentProgress}%)</span>
+                  
+                  <!-- Teks Hemat / Boros Minimalis -->
+                  <span class="font-medium ${isOverBudget ? 'text-rose-600' : 'text-emerald-600'}">
+                    ${isOverBudget ? `Boros ${formatRp(diffAmount)}` : `Hemat ${formatRp(diffAmount)}`}
                   </span>
                 </div>
               </div>
@@ -865,16 +864,15 @@
       txListEl.innerHTML = state.transactions.length === 0
         ? `<p class="text-slate-400 text-xs py-2">Belum ada transaksi di buku saldo.</p>`
         : state.transactions.map((tx) => {
-          // Identifikasi apakah transaksi ini terkait langsung dengan item Goal List
-          const isGoalLinked = state.goals.some(g => g.name.toLowerCase() === tx.category.toLowerCase());
+          const isBudgetLinked = state.goals.some(g => g.name.toLowerCase() === tx.category.toLowerCase());
 
           return `
             <div class="py-2.5 flex justify-between items-center">
               <div>
                 <div class="flex items-center gap-1.5 flex-wrap">
                   <span class="font-bold text-slate-800 text-xs">${tx.title || tx.category}</span>
-                  <span class="text-[10px] ${isGoalLinked ? 'bg-blue-100 text-blue-700 font-semibold' : 'bg-slate-100 text-slate-600'} px-1.5 py-0.5 rounded">
-                    ${isGoalLinked ? '🎯 ' : ''}${tx.category}
+                  <span class="text-[10px] ${isBudgetLinked ? 'bg-blue-100 text-blue-700 font-semibold' : 'bg-slate-100 text-slate-600'} px-1.5 py-0.5 rounded">
+                    ${isBudgetLinked ? '💼 ' : ''}${tx.category}
                   </span>
                 </div>
                 <div class="flex items-center gap-2 mt-0.5 text-[10px] text-slate-400">
