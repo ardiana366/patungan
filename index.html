@@ -125,16 +125,16 @@
       <div class="flex justify-between items-center bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
         <div>
           <h3 class="font-bold text-slate-800 text-sm">Daftar Target (Goal Lists)</h3>
-          <p class="text-xs text-slate-500">Kelola daftar tujuan & biaya bersama</p>
+          <p class="text-xs text-slate-500">Kelola daftar target dan pantau realisasinya</p>
         </div>
         <button onclick="window.openGoalModal()" class="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 shadow transition">
           <i data-lucide="plus" class="w-4 h-4"></i> Tambah Goal
         </button>
       </div>
 
-      <!-- Goals List -->
+      <!-- Goals List (Dengan Realisasi Sisa Saldo per-Goal) -->
       <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
-        <div id="goals-list" class="space-y-2 text-sm"></div>
+        <div id="goals-list" class="space-y-3 text-sm"></div>
       </div>
 
       <!-- Setup Pembagian Actions -->
@@ -264,7 +264,7 @@
       
       <div>
         <label class="block text-xs font-semibold text-slate-500 mb-1">Nama Income / Expense</label>
-        <input type="text" id="tx-title" required placeholder="Contoh: Beli Bensin, Setoran Awal" class="w-full px-3 py-2 border rounded-xl" />
+        <input type="text" id="tx-title" required placeholder="Contoh: Beli Bensin, Setoran Villa" class="w-full px-3 py-2 border rounded-xl" />
       </div>
 
       <div class="grid grid-cols-2 gap-2">
@@ -553,7 +553,7 @@
       let optionsHtml = `<option value="" disabled ${!selectedVal ? 'selected' : ''}>-- Pilih Kategori --</option>`;
       
       if (goalCategories.length > 0) {
-        optionsHtml += `<optgroup label="Dari Goal Lists">`;
+        optionsHtml += `<optgroup label="Dari Goal Lists (Tautkan ke Target)">`;
         goalCategories.forEach((g) => {
           optionsHtml += `<option value="${g}">${g}</option>`;
         });
@@ -711,7 +711,6 @@
           memberObligations[s.name.toLowerCase()] = s.value;
           totalAllocated += s.value;
         } else if (s.type === "percent") {
-          // Persentase dihitung langsung 100% dari Total Goals
           const nominalPercent = (s.value / 100) * totalGoals;
           memberObligations[s.name.toLowerCase()] = nominalPercent;
           totalAllocated += nominalPercent;
@@ -791,26 +790,53 @@
         `).join("");
       }
 
-      // Goals List View
+      // Goals List View (Dengan Fitur: Kategori = Nama Goal List -> Sisa Menuju List Tersebut)
       const goalsListEl = document.getElementById("goals-list");
-      goalsListEl.innerHTML = state.goals.length === 0
-        ? `<p class="text-slate-400 text-xs">Belum ada target goals.</p>`
-        : state.goals.map((g) => `
-          <div class="flex justify-between items-center p-2.5 bg-slate-50 rounded-xl border border-slate-100">
-            <div>
-              <p class="font-semibold text-slate-800">${g.name}</p>
-              <span class="text-xs text-blue-600 font-bold">${formatRp(g.amount)}</span>
+      if (state.goals.length === 0) {
+        goalsListEl.innerHTML = `<p class="text-slate-400 text-xs">Belum ada target goals.</p>`;
+      } else {
+        goalsListEl.innerHTML = state.goals.map((g) => {
+          // Cari saldo transaksi spesifik untuk nama kategori ini
+          const goalCat = catTotals[g.name] || { in: 0, out: 0 };
+          const goalCurrentFunds = goalCat.in - goalCat.out; // dana bersih yang teralokasi
+          const sisaMenujuGoal = g.amount - goalCurrentFunds;
+          const percentProgress = Math.min(100, Math.max(0, Math.round((goalCurrentFunds / g.amount) * 100)));
+
+          return `
+            <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
+              <div class="flex justify-between items-start">
+                <div>
+                  <span class="font-bold text-slate-800 text-sm">${g.name}</span>
+                  <div class="text-xs text-slate-500 mt-0.5">
+                    Target: <strong class="text-slate-700">${formatRp(g.amount)}</strong>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1">
+                  <button onclick="window.editGoal('${g.id}')" class="text-slate-400 hover:text-blue-600 p-1">
+                    <i data-lucide="pencil" class="w-4 h-4"></i>
+                  </button>
+                  <button onclick="window.deleteGoal('${g.id}')" class="text-slate-400 hover:text-rose-500 p-1">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Bar Progres Pengumpulan Realtime -->
+              <div class="space-y-1">
+                <div class="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                  <div class="bg-blue-600 h-1.5 rounded-full transition-all duration-300" style="width: ${percentProgress}%"></div>
+                </div>
+                <div class="flex justify-between items-center text-[11px] pt-1">
+                  <span class="text-slate-500">Teralokasi: <strong class="text-slate-700">${formatRp(goalCurrentFunds)}</strong> (${percentProgress}%)</span>
+                  <span class="font-semibold ${sisaMenujuGoal > 0 ? 'text-amber-600' : 'text-emerald-600'}">
+                    ${sisaMenujuGoal > 0 ? `Sisa menuju list: ${formatRp(sisaMenujuGoal)}` : 'Goal Terpenuhi!'}
+                  </span>
+                </div>
+              </div>
             </div>
-            <div class="flex items-center gap-2">
-              <button onclick="window.editGoal('${g.id}')" class="text-slate-400 hover:text-blue-600 p-1">
-                <i data-lucide="pencil" class="w-4 h-4"></i>
-              </button>
-              <button onclick="window.deleteGoal('${g.id}')" class="text-slate-400 hover:text-rose-500 p-1">
-                <i data-lucide="trash-2" class="w-4 h-4"></i>
-              </button>
-            </div>
-          </div>
-        `).join("");
+          `;
+        }).join("");
+      }
 
       // Schemes List View
       const schemesListEl = document.getElementById("split-schemes-list");
@@ -838,32 +864,39 @@
       const txListEl = document.getElementById("tx-list");
       txListEl.innerHTML = state.transactions.length === 0
         ? `<p class="text-slate-400 text-xs py-2">Belum ada transaksi di buku saldo.</p>`
-        : state.transactions.map((tx) => `
-          <div class="py-2.5 flex justify-between items-center">
-            <div>
-              <div class="flex items-center gap-1.5">
-                <span class="font-bold text-slate-800 text-xs">${tx.title || tx.category}</span>
-                <span class="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-medium">${tx.category}</span>
+        : state.transactions.map((tx) => {
+          // Identifikasi apakah transaksi ini terkait langsung dengan item Goal List
+          const isGoalLinked = state.goals.some(g => g.name.toLowerCase() === tx.category.toLowerCase());
+
+          return `
+            <div class="py-2.5 flex justify-between items-center">
+              <div>
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span class="font-bold text-slate-800 text-xs">${tx.title || tx.category}</span>
+                  <span class="text-[10px] ${isGoalLinked ? 'bg-blue-100 text-blue-700 font-semibold' : 'bg-slate-100 text-slate-600'} px-1.5 py-0.5 rounded">
+                    ${isGoalLinked ? '🎯 ' : ''}${tx.category}
+                  </span>
+                </div>
+                <div class="flex items-center gap-2 mt-0.5 text-[10px] text-slate-400">
+                  <span>By: <strong class="text-slate-600">${tx.inputer}</strong></span>
+                  <span>•</span>
+                  <span>${new Date(tx.date).toLocaleDateString("id-ID", { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+                </div>
               </div>
-              <div class="flex items-center gap-2 mt-0.5 text-[10px] text-slate-400">
-                <span>By: <strong class="text-slate-600">${tx.inputer}</strong></span>
-                <span>•</span>
-                <span>${new Date(tx.date).toLocaleDateString("id-ID", { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+              <div class="flex items-center gap-2">
+                <span class="font-bold ${tx.type === 'income' ? 'text-emerald-600' : 'text-rose-600'}">
+                  ${tx.type === 'income' ? '+' : '-'} ${formatRp(tx.amount)}
+                </span>
+                <button onclick="window.editTx('${tx.id}')" class="text-slate-400 hover:text-blue-600 p-1">
+                  <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="window.deleteTx('${tx.id}')" class="text-slate-300 hover:text-rose-500 p-1">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
               </div>
             </div>
-            <div class="flex items-center gap-2">
-              <span class="font-bold ${tx.type === 'income' ? 'text-emerald-600' : 'text-rose-600'}">
-                ${tx.type === 'income' ? '+' : '-'} ${formatRp(tx.amount)}
-              </span>
-              <button onclick="window.editTx('${tx.id}')" class="text-slate-400 hover:text-blue-600 p-1">
-                <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
-              </button>
-              <button onclick="window.deleteTx('${tx.id}')" class="text-slate-300 hover:text-rose-500 p-1">
-                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-              </button>
-            </div>
-          </div>
-        `).join("");
+          `;
+        }).join("");
 
       lucide.createIcons();
     }
